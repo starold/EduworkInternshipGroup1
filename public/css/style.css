@@ -1,0 +1,308 @@
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-text-main: #1f2937;
+    --color-text-muted: #6b7280;
+    --color-bg-light: #f8fafc;
+    --color-border: #e2e8f0;
+    --color-success: #10b981;
+    --font-family: 'Inter', sans-serif;
+    --spacing-container: 120px;
+    --border-radius-card: 12px;
+    --border-radius-btn: 8px;
+}
+
+body {
+    font-family: var(--font-family);
+    color: var(--color-text-main);
+    background-color: #ffffff;
+    overflow-x: hidden;
+}
+
+.navbar-ed {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--color-border);
+    padding: 18px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-ed__brand {
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--color-primary);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+}
+
+.navbar-ed__nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.navbar-ed__nav-link:hover,
+.navbar-ed__nav-link.active {
+    color: var(--color-primary);
+    background-color: #eff6ff;
+}
+
+.navbar-ed__btn-whatsapp {
+    background-color: #ecfdf5;
+    color: #059669;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.navbar-ed__btn-login {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.navbar-ed__btn-login:hover {
+    background-color: var(--color-primary-dark);
+    color: #ffffff;
+}
+
+.filter-section {
+    background-color: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 24px;
+    margin-bottom: 32px;
+}
+
+.filter-group__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+}
+
+.filter-group__control {
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--color-text-main);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vehicle-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-card);
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.vehicle-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.vehicle-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: 2px;
+}
+
+.vehicle-card__subtitle {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+}
+
+.vehicle-card__img-container {
+    text-align: center;
+    padding: 12px 0;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vehicle-card__img {
+    max-height: 120px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.vehicle-card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+    margin-bottom: 16px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--color-border);
+}
+
+.vehicle-card__badge-status {
+    color: var(--color-success);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.vehicle-card__badge-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-success);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.vehicle-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vehicle-card__price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.vehicle-card__price span {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.vehicle-card__btn-booking {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-btn);
+    border: none;
+    transition: background-color 0.2s;
+    text-decoration: none;
+}
+
+.vehicle-card__btn-booking:hover {
+    background-color: var(--color-primary-dark);
+    color: #ffffff;
+}
+
+.terms-section {
+    background-color: #f8fafc;
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 64px;
+    margin-bottom: 64px;
+    border: 1px solid var(--color-border);
+}
+
+.terms-section__title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.terms-section__desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+}
+
+.terms-list {
+    padding-left: 20px;
+    font-size: 14px;
+    color: var(--color-text-main);
+    line-height: 1.8;
+}
+
+.terms-list li {
+    margin-bottom: 12px;
+}
+
+.footer-ed {
+    border-top: 1px solid var(--color-border);
+    padding: 48px 0 24px 0;
+    background-color: #ffffff;
+    font-size: 14px;
+}
+
+.footer-ed__brand-desc {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 12px;
+    max-width: 280px;
+}
+
+.footer-ed__heading {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-main);
+    margin-bottom: 16px;
+}
+
+.footer-ed__link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.footer-ed__link:hover {
+    color: var(--color-primary);
+}
+
+.footer-ed__bottom {
+    border-top: 1px solid var(--color-border);
+    margin-top: 40px;
+    padding-top: 24px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 1024px) {
+    .navbar-collapse {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-top: 15px;
+    }
+}

@@ -1,0 +1,414 @@
+/* ==========================================================================
+   ED.RENT - Daftar Kendaraan
+   Desktop (default) | Tablet (max-width: 1024px) | Mobile (max-width: 768px)
+   Nilai diukur dari frame Figma 1440px, lalu dihitung proporsional.
+   ========================================================================== */
+
+/* ---------- Design tokens ---------- */
+:root {
+  /* Warna */
+  --color-primary: #3563e9;
+  --color-primary-hover: #2a50c4;
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-text: #1a202c;
+  --color-muted: #90a3bf;
+  --color-border: #e2e8f0;
+  --color-success: #84cc16;
+  --color-whatsapp: #25d366;
+
+  /* Tipografi */
+  --font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-sm: 14px;
+  --fs-base: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 32px;
+  --fs-logo: 30px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --lh-tight: 1.25;
+  --lh-base: 1.5;
+  --lh-relaxed: 1.625;
+
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 40px;
+  --sp-8: 48px;
+  --sp-9: 64px;
+  --sp-10: 88px;
+
+  /* Layout */
+  --container-max: 1440px;
+  --container-pad: 60px;
+  --navbar-height: 99px;
+  --control-height: 48px;
+  --btn-height: 44px;
+
+  /* Bentuk */
+  --radius-sm: 4px;
+  --shadow-card: 0 1px 4px rgba(15, 23, 42, 0.06);
+
+  /* Motion */
+  --transition-menu: 0.35s ease;
+  --transition-fast: 0.2s ease;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, p, ul, ol { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+.container-ed {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-pad);
+}
+
+/* ---------- Button ---------- */
+.btn-ed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: var(--btn-height);
+  padding: 0 var(--sp-5);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.btn-ed--primary { min-width: 108px; color: #fff; background-color: var(--color-primary); }
+.btn-ed--primary:hover { color: #fff; background-color: var(--color-primary-hover); }
+.btn-ed--outline {
+  padding: 0 var(--sp-4);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+}
+.btn-ed--outline:hover { border-color: var(--color-muted); }
+.btn-ed__icon { font-size: 22px; line-height: 1; }
+.btn-ed__icon--wa { color: var(--color-whatsapp); }
+
+/* ---------- Navbar ---------- */
+.site-header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.navbar-ed__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--navbar-height);
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-pad);
+}
+.navbar-ed__brand {
+  font-size: var(--fs-logo);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+.navbar-ed__toggler {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-height);
+  height: var(--btn-height);
+  padding: 0;
+  font-size: 28px;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.navbar-ed__menu { align-items: center; gap: 61px; }
+.navbar-ed__list { display: flex; align-items: center; gap: 68px; }
+.navbar-ed__link {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  transition: color var(--transition-fast);
+}
+.navbar-ed__link:hover,
+.navbar-ed__link--active { color: var(--color-primary); }
+.navbar-ed__actions { display: flex; align-items: center; gap: var(--sp-5); }
+
+/* Desktop: menu selalu tampil (override .collapse Bootstrap) */
+@media (min-width: 1025px) {
+  .navbar-ed__menu { display: flex !important; height: auto !important; }
+}
+
+/* ---------- Page head ---------- */
+.page { padding: var(--sp-8) 0 96px; }
+.page-head__title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+}
+.page-head__desc {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-base);
+  line-height: var(--sp-5);
+}
+
+/* ---------- Filter ---------- */
+.filter {
+  margin-top: var(--sp-7);
+  padding: 18px var(--sp-3) var(--sp-4);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+.filter__form {
+  display: grid;
+  grid-template-columns: 200px 280px 280px 1fr;
+  gap: var(--sp-4);
+}
+.filter__label {
+  display: block;
+  margin-bottom: var(--sp-3);
+  font-size: var(--fs-base);
+  line-height: 20px;
+  color: var(--color-muted);
+}
+.filter__control {
+  height: var(--control-height);
+  padding: 0 var(--sp-4);
+  gap: var(--sp-3);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.filter__icon { flex: none; font-size: 18px; line-height: 1; color: var(--color-muted); }
+.filter__icon--accent { color: var(--color-primary); }
+.filter__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  appearance: none;
+}
+.filter__input::placeholder { color: var(--color-text); opacity: 1; }
+.filter__input--select { cursor: pointer; }
+.filter__input--time { flex: 0 0 56px; width: 56px; }
+.filter__control:focus-within { border-color: var(--color-primary); }
+.filter__divider { flex: none; width: 1px; height: 20px; background-color: var(--color-border); }
+.filter__hint {
+  flex: none;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.filter__group--duration .filter__input { flex: 0 0 auto; width: 52px; }
+.filter__group--duration .filter__hint { margin-left: auto; }
+
+/* ---------- Vehicles ---------- */
+.vehicles { margin-top: var(--sp-7); }
+.vehicles__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-5);
+}
+.vehicle-card { background-color: var(--color-surface); }
+.vehicle-card__body { display: flex; flex-direction: column; height: 100%; padding: var(--sp-5); }
+.vehicle-card__name {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  line-height: 28px;
+  letter-spacing: -0.02em;
+}
+.vehicle-card__type {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  line-height: 20px;
+  color: var(--color-muted);
+}
+.vehicle-card__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 198px;
+  margin-top: var(--sp-4);
+}
+.vehicle-card__img { width: 100%; height: 100%; object-fit: contain; }
+.vehicle-card__meta {
+  justify-content: space-between;
+  margin-top: 28px;
+  font-size: var(--fs-sm);
+  line-height: 20px;
+}
+.vehicle-card__plate { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--color-muted); }
+.vehicle-card__plate .bi { font-size: 18px; line-height: 1; }
+.vehicle-card__status { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--color-success); }
+.vehicle-card__status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+.vehicle-card__foot { justify-content: space-between; margin-top: 26px; gap: var(--sp-3); }
+.vehicle-card__price {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.vehicle-card__price-unit {
+  margin-left: 2px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0;
+  color: var(--color-muted);
+}
+
+/* ---------- Terms ---------- */
+.terms { margin-top: 88px; }
+.terms__title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+}
+.terms__lead { margin-top: var(--sp-3); line-height: var(--sp-5); }
+.terms__list { margin-top: var(--sp-4); padding-left: 64px; list-style: decimal; }
+.terms__item { padding-left: 0; line-height: var(--lh-relaxed); }
+.terms__item + .terms__item { margin-top: var(--sp-4); }
+.terms__item::marker { color: var(--color-text); }
+.terms__item strong { font-weight: var(--fw-semibold); }
+
+/* ---------- Footer ---------- */
+.site-footer { padding: var(--sp-10) 0 0; background-color: var(--color-surface); }
+.site-footer__top { display: flex; justify-content: space-between; gap: var(--sp-6); }
+.site-footer__logo {
+  display: inline-block;
+  font-size: var(--fs-logo);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+.site-footer__desc { max-width: 290px; margin-top: var(--sp-4); line-height: var(--sp-5); color: var(--color-muted); }
+.site-footer__nav { display: grid; grid-template-columns: 212px 152px; }
+.site-footer__heading { font-size: var(--fs-lg); font-weight: var(--fw-semibold); line-height: 28px; letter-spacing: -0.02em; }
+.site-footer__links { display: grid; margin-top: var(--sp-4); }
+.site-footer__col--about .site-footer__links { margin-top: var(--sp-3); }
+.site-footer__col--socials .site-footer__links { margin-top: var(--sp-5); gap: var(--sp-5); }
+.site-footer__link { color: var(--color-muted); transition: color var(--transition-fast); }
+.site-footer__link:hover { color: var(--color-primary); }
+.site-footer__bottom {
+  margin-top: 56px;
+  padding: var(--sp-5) 0 var(--sp-9);
+  border-top: 1px solid var(--color-border);
+}
+.site-footer__copy { font-weight: var(--fw-medium); }
+
+/* ==========================================================================
+   Tablet (max-width: 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  :root { --container-pad: 40px; --navbar-height: 80px; }
+
+  /* Navbar -> hamburger */
+  .navbar-ed__toggler { display: inline-flex; }
+  .navbar-ed__menu {
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .navbar-ed__menu.collapsing { transition: height var(--transition-menu); }
+  .navbar-ed__menu.collapse.show { display: flex; }
+  .navbar-ed__list { flex-direction: column; align-items: stretch; gap: 0; padding-top: var(--sp-2); }
+  .navbar-ed__link { display: block; padding: var(--sp-3) 0; }
+  .navbar-ed__actions { padding: var(--sp-3) 0 var(--sp-5); }
+
+  /* Filter 2 x 2 */
+  .filter__form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Kendaraan 3 kolom */
+  .vehicles__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .site-footer__nav { grid-template-columns: 160px 152px; }
+}
+
+/* ==========================================================================
+   Mobile (max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  :root {
+    --container-pad: 20px;
+    --fs-xl: 24px;
+    --fs-logo: 26px;
+  }
+
+  .page { padding: var(--sp-6) 0 var(--sp-9); }
+  .filter__form { grid-template-columns: minmax(0, 1fr); }
+  .vehicles__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+  .vehicle-card__body { padding: var(--sp-4); }
+  .vehicle-card__media { height: 150px; }
+  .vehicle-card__foot { flex-wrap: wrap; }
+  .vehicle-card__foot .btn-ed { width: 100%; }
+
+  .terms { margin-top: var(--sp-9); }
+  .terms__list { padding-left: 28px; }
+
+  .site-footer { padding-top: var(--sp-9); }
+  .site-footer__top { flex-direction: column; }
+  .site-footer__bottom { margin-top: var(--sp-6); padding-bottom: var(--sp-6); }
+}
+
+@media (max-width: 520px) {
+  .vehicles__grid { grid-template-columns: minmax(0, 1fr); }
+  .vehicle-card__media { height: 198px; }
+  .navbar-ed__actions { flex-direction: column; align-items: stretch; }
+  .filter__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}
