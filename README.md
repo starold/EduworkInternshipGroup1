@@ -1,58 +1,293 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏍️ ED.RENT - Sistem Informasi Rental Sepeda Motor
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**ED.RENT** adalah platform aplikasi web rental sepeda motor berbasis **Laravel** yang mengusung arsitektur **MVC (Model-View-Controller)**. Aplikasi ini dirancang untuk memudahkan proses penyewaan kendaraan roda dua secara fleksibel, transparan, dan terstruktur, dengan memisahkan hak akses antara **Penyewa (Customer)** dan **Pengelola (Admin)**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📑 Daftar Isi
+1. [Fitur Utama](#-fitur-utama)
+2. [Teknologi yang Digunakan](#-teknologi-yang-digunakan)
+3. [Struktur Folder & Penjelasan Lengkap](#-struktur-folder--penjelasan-lengkap)
+4. [Alur Framework Laravel (MVC Request Lifecycle)](#-alur-framework-laravel-mvc-request-lifecycle)
+5. [Alur Bisnis Aplikasi (Business & User Flow)](#-alur-bisnis-aplikasi-business--user-flow)
+6. [Skema & Relasi Database (ERD)](#-skema--relasi-database-erd)
+7. [Tata Cara Menjalankan Aplikasi (Setup & Running)](#-tata-cara-menjalankan-aplikasi-setup--running)
+8. [Akun Pengguna Default](#-akun-pengguna-default)
+9. [Perintah Artisan Penting (Cheat Sheet)](#-perintah-artisan-penting-cheat-sheet)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🌟 Fitur Utama
 
-## Learning Laravel
+### 👤 Sisi Penyewa (Customer)
+- **Katalog & Filter Kendaraan**: Eksplorasi motor berdasarkan kategori (Matic, Manual, Sport, Trail), harga harian, dan ketersediaan unit.
+- **Pemesanan Fleksibel (Booking)**: Menentukan tanggal mulai & tanggal selesai sewa, metode pengambilan (Ambil di Rental / Diantar ke Lokasi), serta kalkulasi biaya harian dan deposit jaminan secara otomatis.
+- **Sistem Pembayaran**: Informasi rekening transfer dan form unggah (*upload*) bukti transfer pembayaran.
+- **Daftar Pesanan & Status Tracking**: Memantau status pesanan sewa secara berkala (*Menunggu Pembayaran*, *Menunggu Konfirmasi*, *Dikonfirmasi*, *Sedang Berjalan*, *Selesai*, *Dibatalkan*).
+- **Autentikasi Aman**: Login, Registrasi, dan manajemen sesi pengguna.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🛡️ Sisi Pengelola (Admin Panel)
+- **Dashboard Ringkasan Operasional**: Statistik total unit motor, pesanan yang butuh konfirmasi, dan sewa aktif.
+- **Manajemen Armada Motor (CRUD)**: Menambah unit motor baru, memperbarui spesifikasi/harga harian, mengatur status ketersediaan (*Tersedia*, *Disewa*, *Servis/Perawatan*), dan menghapus unit.
+- **Verifikasi Pesanan & Pembayaran**: Memvalidasi bukti transfer yang diunggah pelanggan, lalu mengonfirmasi (*Approve*) atau menolak (*Reject*) pesanan.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🛠️ Teknologi yang Digunakan
+- **Backend Framework**: Laravel 13
+- **Bahasa Pemrograman**: PHP 8.5
+- **Database Engine**: MySQL / MariaDB (XAMPP)
+- **ORM**: Eloquent ORM
+- **Frontend / View Engine**: Laravel Blade Templating & Vanilla CSS modern (responsif, tanpa dependensi framework CSS berat)
+- **Dependency Manager**: Composer 2.x
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 📂 Struktur Folder & Penjelasan Lengkap
 
-```bash
-composer require laravel/boost --dev
+Berikut adalah pemetaan folder dan berkas penting di dalam proyek:
 
-php artisan boost:install
+```text
+EduworkInternshipGroup1/
+├── app/                  # Inti logika aplikasi (Models, Controllers, Middleware, Enums)
+│   ├── Enums/            # Definisi status & role bertipe aman (PHP 8.1+ Enums)
+│   ├── Http/
+│   │   ├── Controllers/  # Penangan request dari route (Auth, Customer, Admin)
+│   │   └── Middleware/   # Filter & penjaga otorisasi route (AdminMiddleware)
+│   └── Models/           # Representasi tabel database (Eloquent ORM)
+├── bootstrap/            # Berkas inisialisasi awal saat framework booting
+├── config/               # Seluruh konfigurasi global aplikasi (database, auth, session, dll)
+├── database/             # Skema tabel, seeder, dan factory database
+│   ├── factories/        # Generator data dummy untuk testing
+│   ├── migrations/       # Blueprint skema tabel database (DDL)
+│   └── seeders/          # Pengisi data awal ke database (DatabaseSeeder)
+├── public/               # Titik akses web publik (index.php, CSS, JS, symlink storage)
+├── resources/            # Kode tampilan dan aset mentah
+│   ├── css/ & js/        # Skrip dan stylesheet frontend
+│   └── views/            # Template tampilan HTML Blade (.blade.php)
+├── routes/               # Definisi alamat URL dan endpoint aplikasi (web.php)
+├── storage/              # Penyimpanan internal (log, cache session, file upload publik)
+├── tests/                # Pengujian otomatis (Pest / Feature & Unit Test)
+├── vendor/               # Library pihak ketiga yang diinstal via Composer
+├── .env                  # Pengaturan variabel lingkungan (koneksi DB, APP_KEY)
+├── artisan               # Runner perintah baris perintah Laravel
+└── composer.json         # Konfigurasi dependensi paket PHP
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Penjelasan Rinci Sub-Folder Utama:
 
-## Contributing
+1. **`app/Enums/`**:
+   - `UserRole.php`: Mengatur hak akses peran pengguna (`Admin`, `Customer`).
+   - `MotorStatus.php`: Status ketersediaan motor (`Available`, `Rented`, `Maintenance`).
+   - `BookingStatus.php`: Alur status transaksi (`Pending`, `Confirmed`, `Ongoing`, `Completed`, `Cancelled`).
+   - `PaymentStatus.php`: Status verifikasi pembayaran (`Unpaid`, `PendingConfirmation`, `Paid`, `Failed`).
+   - `PickupMethod.php`: Opsi pengambilan motor (`SelfPickup`, `Delivery`).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **`app/Http/Controllers/`**:
+   - `Auth/`: Menangani autentikasi pengguna (`LoginController.php` & `RegisterController.php`).
+   - `Customer/`: Logika untuk penyewa (`HomeController.php`, `BookingController.php`, `PaymentController.php`).
+   - `Admin/`: Logika panel pengelola (`DashboardController.php`, `MotorController.php`, `BookingController.php`).
 
-## Code of Conduct
+3. **`app/Http/Middleware/`**:
+   - `AdminMiddleware.php`: Memastikan pengguna telah login dan berstatus `admin` sebelum mengakses URL grup `/admin/*`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **`app/Models/`**:
+   - `User.php`: Model data pengguna (admin & customer).
+   - `MotorCategory.php`: Kategori motor (Matic, Manual, Sport, Trail).
+   - `Motor.php`: Data unit kendaraan dan relasi ke kategori dan pemesanan.
+   - `Booking.php`: Data induk transaksi pemesanan.
+   - `BookingItem.php`: Rincian unit motor yang disewa dalam satu pesanan.
+   - `Payment.php`: Data transaksi dan berkas bukti pembayaran.
+   - `Rental.php`: Pencatatan operasional sewa saat motor sedang dipakai.
+   - `Review.php` & `Fine.php`: Ulasan penyewa dan denda keterlambatan/kerusakan.
 
-## Security Vulnerabilities
+5. **`resources/views/`**:
+   - `layouts/`: Master template halaman (`app.blade.php` untuk customer, `admin.blade.php` untuk admin, `guest.blade.php` untuk auth).
+   - `customer/`: Tampilan halaman beranda, katalog kendaraan, pembuatan booking, detail booking, dan form upload pembayaran.
+   - `admin/`: Tampilan dashboard admin, kelola motor (list, create, edit), dan verifikasi booking.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 🔄 Alur Framework Laravel (MVC Request Lifecycle)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Bagaimana sebuah permintaan diproses dari browser hingga menghasilkan halaman web:
+
+```text
+ ┌──────────────────┐
+ │ Browser Pengguna │ ──(1) Kirim HTTP Request (contoh: GET /kendaraan)
+ └────────┬─────────┘
+          │
+          ▼
+ ┌──────────────────┐
+ │ public/index.php │ ──(2) Booting Core Framework & Kernel
+ └────────┬─────────┘
+          │
+          ▼
+ ┌──────────────────┐
+ │  routes/web.php  │ ──(3) Cocokkan URL dengan Route yang terdaftar
+ └────────┬─────────┘
+          │
+          ▼
+ ┌──────────────────┐
+ │    Middleware    │ ──(4) Validasi Hak Akses (Auth, Admin Check, CSRF)
+ └────────┬─────────┘
+          │
+          ▼
+ ┌──────────────────┐
+ │    Controller    │ ──(5) Eksekusi Logika Bisnis & Pengambilan Data
+ └────────┬─────────┘
+          │
+     ┌────┴───────────────────────────┐
+     ▼                                ▼
+ ┌────────────────────────┐      ┌────────────────────────┐
+ │   Model (Eloquent)     │      │   Blade View Engine    │
+ └────────┬───────────────┘      └────────┬───────────────┘
+          │                               │
+          ▼ (Query ke DB)                 ▼ (Kompilasi HTML)
+ ┌────────────────────────┐      ┌────────────────────────┐
+ │     Database MySQL     │      │   HTML Web Response    │
+ └────────────────────────┘      └────────┬───────────────┘
+                                          │
+                                          ▼
+                                 ┌──────────────────┐
+                                 │ Browser Pengguna │
+                                 └──────────────────┘
+```
+
+1. **Request Diterima**: Pengguna mengakses URL melalui peramban web.
+2. **Entry Point (`public/index.php`)**: Memuat dependensi Composer dan memulai aplikasi Laravel.
+3. **Pencocokan Rute (`routes/web.php`)**: Laravel mencari controller dan fungsi yang sesuai dengan rute.
+4. **Pemeriksaan Middleware**: Rute yang dilindungi (seperti halaman admin atau form sewa) diperiksa terlebih dahulu keabsahan sesi loginnya.
+5. **Eksekusi Controller**: Controller memproses parameter input, berinteraksi dengan **Model Eloquent** untuk menarik/mengubah data di database MySQL.
+6. **Rendering View**: Controller mengoper data hasil kueri ke template Blade (`.blade.php`).
+7. **Pengiriman Response**: Template dikompilasi menjadi dokumen HTML murni dan dikembalikan ke browser dengan kode status HTTP 200 OK.
+
+---
+
+## 💼 Alur Bisnis Aplikasi (Business & User Flow)
+
+### 🛵 A. Alur Penyewa (Customer Flow)
+1. **Eksplorasi Motor**: Customer mengunjungi halaman utama atau menu **Pilih Kendaraan** untuk melihat daftar motor yang tersedia beserta tarif harian dan spesifikasinya.
+2. **Login / Daftar**: Jika belum memiliki akun, customer dapat mendaftar di menu **Daftar** lalu login.
+3. **Reservasi Unit**: Customer memilih motor, menentukan tanggal sewa dan tanggal kembali, serta memilih metode pengambilan (*Ambil di Garasi* atau *Diantar ke Lokasi*).
+4. **Kalkulasi Biaya Otomatis**: Sistem menghitung total hari sewa × harga per hari + biaya deposit jaminan.
+5. **Pembayaran**: Customer diarahkan ke halaman pembayaran, mentransfer sesuai nominal yang tertera, lalu mengunggah foto struk/bukti transfer.
+6. **Pemantauan Status**: Customer memantau proses verifikasi pesanan pada menu **Daftar Pesanan**.
+
+### 🛠️ B. Alur Pengelola (Admin Flow)
+1. **Login Admin**: Masuk melalui `/login` dengan kredensial administrator.
+2. **Dashboard Monitoring**: Mengamati ringkasan total armada, jumlah pesanan baru, dan status kendaraan.
+3. **Kelola Armada Motor**: Admin mendaftarkan motor baru (merk, model, tahun, plat nomor, tarif sewa harian, foto unit) atau memperbarui status motor yang sedang diservis.
+4. **Verifikasi Pesanan**: Membuka menu pesanan masuk, memeriksa keaslian bukti transfer yang diunggah customer, lalu mengklik tombol **Konfirmasi** atau **Tolak**.
+
+---
+
+## 🗄️ Skema & Relasi Database (ERD)
+
+Aplikasi menggunakan skema database relasional ternormalisasi:
+
+- **`users`**: Data identitas pengguna dan peran (`role`: `admin`, `customer`).
+- **`motor_categories`**: Kategori kendaraan (Matic, Manual, Sport, Trail).
+  - *Relasi*: Satu kategori memiliki banyak motor (*One-to-Many* ke `motors`).
+- **`motors`**: Data unit sepeda motor (merk, model, warna, nomor plat, harga sewa per hari, deposit, deskripsi, foto, status).
+- **`bookings`**: Data transaksi penyewaan (kode booking unik, tanggal mulai, tanggal selesai, metode pengambilan, status pesanan).
+  - *Relasi*: Dimiliki oleh satu user (*Many-to-One* ke `users`).
+- **`booking_items`**: Rincian motor yang disewa per pesanan (harga sewa, subtotal hari, durasi).
+- **`payments`**: Data pembayaran dan berkas bukti transfer (*One-to-One* dengan `bookings`).
+- **`rentals`** & **`rental_returns`**: Log operasional serah-terima fisik motor dan pengembalian unit.
+- **`reviews`** & **`fines`**: Ulasan kepuasan pelanggan serta pencatatan denda (keterlambatan/kerusakan).
+
+---
+
+## ⚡ Tata Cara Menjalankan Aplikasi (Setup & Running)
+
+### 1. Prasyarat Sistem
+Pastikan di komputer Anda sudah terpasang:
+- **XAMPP** (dengan modul Apache & MySQL)
+- **PHP** (minimal versi 8.3 atau 8.5)
+- **Composer** (versi 2.x)
+
+---
+
+### 2. Nyalakan Database di XAMPP
+1. Buka aplikasi **XAMPP Control Panel**.
+2. Klik tombol **Start** pada baris **MySQL** (dan baris **Apache**).
+3. Pastikan indikator **MySQL** berwarna **hijau** (aktif di port default 3306).
+
+---
+
+### 3. Langkah Menjalankan Aplikasi (Running Daily)
+
+Buka terminal pada folder proyek (`EduworkInternshipGroup1`), lalu jalankan server Laravel:
+
+```powershell
+php artisan serve
+```
+
+Jika server berhasil berjalan, terminal akan menampilkan:
+```text
+INFO  Server running on [http://127.0.0.1:8000].
+Press Ctrl+C to stop the server
+```
+
+> 💡 **Troubleshooting: Jika muncul error *"php : The term 'php' is not recognized"***
+> Muat path binary PHP terlebih dahulu di jendela terminal yang sama dengan mengetik:
+> ```powershell
+> $env:Path = "C:\Users\Hp\.config\herd-lite\bin;" + $env:Path
+> php artisan serve
+> ```
+
+---
+
+### 4. Akses Web Melalui Browser
+Buka browser dan buka tautan berikut:
+- **Halaman Depan / Publik**: [http://localhost:8000](http://localhost:8000)
+- **Daftar Seluruh Kendaraan**: [http://localhost:8000/kendaraan](http://localhost:8000/kendaraan)
+- **Halaman Login**: [http://localhost:8000/login](http://localhost:8000/login)
+- **Halaman Pendaftaran**: [http://localhost:8000/register](http://localhost:8000/register)
+- **Dashboard Admin**: [http://localhost:8000/admin/dashboard](http://localhost:8000/admin/dashboard)
+
+---
+
+### 5. Cara Mematikan Server
+- Klik pada jendela terminal tempat server berjalan, lalu tekan kombinasi tombol keyboard **`Ctrl` + `C`**.
+- Pada XAMPP Control Panel, Anda dapat mengklik tombol **Stop** pada modul **MySQL**.
+
+---
+
+## 🔑 Akun Pengguna Default
+
+Database telah dilengkapi data awal (*seeder*) yang siap digunakan untuk pengujian:
+
+| Peran (Role) | Email | Password | Fungsi Akun |
+|---|---|---|---|
+| **Administrator** | `admin@edrent.com` | `password` | Mengakses dashboard admin, mengelola armada motor, dan memverifikasi pesanan sewa. |
+| **Penyewa (Customer)** | `budi@example.com` | `password` | Menguji alur pencarian motor, membuat booking, dan mengunggah bukti bayar. |
+
+*(Anda juga dapat membuat akun customer baru secara mandiri melalui menu Register).*
+
+---
+
+## 📌 Perintah Artisan Penting (Cheat Sheet)
+
+Kumpulan perintah bermanfaat saat pengembangan aplikasi:
+
+```powershell
+# Menjalankan server aplikasi
+php artisan serve
+
+# Menjalankan migrasi database
+php artisan migrate
+
+# Me-reset database dan mengisi ulang data dummy (Fresh + Seed)
+php artisan migrate:fresh --seed
+
+# Membuat symlink agar file upload dapat diakses publik
+php artisan storage:link
+
+# Melihat seluruh daftar rute URL aplikasi
+php artisan route:list
+
+# Membersihkan cache konfigurasi dan rute aplikasi
+php artisan optimize:clear
+```
