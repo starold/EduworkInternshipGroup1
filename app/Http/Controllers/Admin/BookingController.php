@@ -5,11 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\BookingStatus;
 use App\Enums\MotorStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\RentalStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ConfirmReturnRequest;
 use App\Models\Booking;
+use App\Models\BookingItem;
 use App\Models\MotorCategory;
+use App\Models\Rental;
+use App\Services\BookingCompletionService;
+use App\Services\ReturnConfirmationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -45,7 +52,14 @@ class BookingController extends Controller
 
     public function show(Booking $booking): View
     {
-        $booking->load(['user', 'items.motor.category', 'payment']);
+        $booking->load([
+            'user',
+            'items.motor.category',
+            'items.rental.rentalReturn',
+            'items.fines.payment',
+            'items.review',
+            'payment',
+        ]);
 
         return view('admin.bookings.show', compact('booking'));
     }
@@ -54,14 +68,30 @@ class BookingController extends Controller
     {
         abort_if(! $booking->isPending(), 403, 'Booking tidak dalam status pending.');
 
-        $booking->update(['status' => BookingStatus::Confirmed]);
+        DB::transaction(function () use ($booking) {
+            $booking->update(['status' => BookingStatus::Confirmed]);
 
-        if ($booking->payment) {
-            $booking->payment->update([
-                'status' => PaymentStatus::Paid,
-                'paid_at' => now(),
-            ]);
-        }
+            if ($booking->payment) {
+                $booking->payment->update([
+                    'status' => PaymentStatus::Paid,
+                    'paid_at' => now(),
+                ]);
+            }
+
+            // Synchronize rental records for each booking item
+            foreach ($booking->items as $item) {
+                if (! $item->rental) {
+                    Rental::create([
+                        'booking_item_id' => $item->id,
+                        'pickup_at' => $booking->start_date,
+                        'due_date' => $item->due_date,
+                        'status' => RentalStatus::Active,
+                    ]);
+                } else {
+                    $item->rental->update(['status' => RentalStatus::Active]);
+                }
+            }
+        });
 
         return back()->with('success', 'Booking berhasil dikonfirmasi.');
     }
@@ -86,5 +116,37 @@ class BookingController extends Controller
         });
 
         return back()->with('success', 'Booking berhasil ditolak.');
+    }
+
+    public function confirmReturn(
+        ConfirmReturnRequest $request,
+        Booking $booking,
+        BookingItem $item,
+        ReturnConfirmationService $returnService
+    ): RedirectResponse {
+        abort_if($item->booking_id !== $booking->id, 404, 'Item tidak sesuai dengan pesanan.');
+
+        try {
+            $result = $returnService->confirmReturn(
+                item: $item,
+                returnTime: now(),
+                returnData: $request->validated()
+            );
+
+            return back()->with('success', $result['message']);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function complete(Booking $booking, BookingCompletionService $completionService): RedirectResponse
+    {
+        try {
+            $result = $completionService->completeBookingByAdmin($booking, Auth::user());
+
+            return back()->with('success', $result['message']);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

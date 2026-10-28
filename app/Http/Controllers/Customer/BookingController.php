@@ -101,7 +101,14 @@ class BookingController extends Controller
     {
         abort_if($booking->user_id !== Auth::id(), 403);
 
-        $booking->load(['items.motor.category', 'payment', 'user']);
+        $booking->load([
+            'items.motor.category',
+            'items.fines',
+            'items.review',
+            'items.rental.rentalReturn',
+            'payment',
+            'user',
+        ]);
 
         return view('customer.bookings.show', compact('booking'));
     }

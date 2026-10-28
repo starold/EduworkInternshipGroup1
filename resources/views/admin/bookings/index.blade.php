@@ -128,7 +128,7 @@
             </div>
             <div class="booking-status">
                 <div class="booking-label">Status</div>
-                <span class="badge badge-{{ $booking->status->value }}">{{ $booking->status->label() }}</span>
+                <span class="badge {{ $booking->uiStatusBadgeClass() }}">{{ $booking->uiStatusLabel() }}</span>
             </div>
             <div class="booking-price">
                 <div class="booking-label">Harga</div>

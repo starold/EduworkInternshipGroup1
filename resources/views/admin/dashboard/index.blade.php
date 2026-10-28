@@ -154,7 +154,7 @@
                     <div>
                         <div class="recent-name">{{ $motor ? $motor->merk.' '.$motor->model : 'Kendaraan tidak tersedia' }}</div>
                         <div class="recent-customer">{{ $booking->user->name }}</div>
-                        <span class="status-chip">{{ $booking->status->label() }}</span>
+                        <span class="badge {{ $booking->uiStatusBadgeClass() }}" style="margin-top:4px">{{ $booking->uiStatusLabel() }}</span>
                     </div>
                     <div class="recent-meta">
                         <div class="recent-date">{{ $booking->created_at->format('d M Y') }}</div>

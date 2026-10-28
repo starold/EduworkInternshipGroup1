@@ -12,7 +12,7 @@
 .orders-table-wrap { background:#fff; border:1px solid #e8e8f0; border-radius:12px; overflow:hidden; margin-bottom:48px; }
 table { width:100%; border-collapse:collapse; }
 thead { background:#f7f8fa; }
-th { padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#9a9aaa; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #e8e8f0; }
+th { padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#9a9aaa; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #e8e8f0; white-space:nowrap; }
 td { padding:16px; font-size:14px; color:#4a4a5a; border-bottom:1px solid #f0f0f8; vertical-align:middle; }
 tr:last-child td { border-bottom:none; }
 tr:hover td { background:#fafbfd; }
@@ -20,18 +20,8 @@ tr:hover td { background:#fafbfd; }
 /* Motor thumbnail in table */
 .tbl-motor-wrap { display:flex; align-items:center; gap:12px; }
 .tbl-motor-img { width:80px; height:56px; object-fit:contain; border-radius:8px; background:#f7f8fa; border:1px solid #e8e8f0; padding:4px; flex-shrink:0; }
-.tbl-motor-info { }
 .tbl-motor-name { font-size:14px; font-weight:700; color:#0d0d0d; }
 .tbl-motor-type { font-size:12px; color:#9a9aaa; }
-
-/* Status Badges */
-.badge { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:50px; font-size:11px; font-weight:700; white-space:nowrap; }
-.badge::before { content:'●'; font-size:8px; }
-.badge-pending { background:#fef9c3; color:#ca8a04; }
-.badge-confirmed { background:#dcfce7; color:#16a34a; }
-.badge-cancelled { background:#f3f4f6; color:#6b7280; }
-.badge-rejected { background:#fee2e2; color:#dc2626; }
-.badge-completed { background:#dbeafe; color:#1d4ed8; }
 
 /* Price */
 .tbl-price { font-size:14px; font-weight:800; color:#0d0d0d; }
@@ -45,12 +35,12 @@ tr:hover td { background:#fafbfd; }
 /* Empty State */
 .empty-state { text-align:center; padding:80px 0; color:#9a9aaa; }
 .empty-state h3 { font-size:18px; color:#4a4a5a; margin-bottom:8px; }
-.btn-cari { display:inline-block; margin-top:16px; padding:12px 28px; background:#1847ED; color:#fff; border-radius:8px; font-size:14px; font-weight:700; }
+.btn-cari { display:inline-block; margin-top:16px; padding:12px 28px; background:#1847ED; color:#fff; border-radius:8px; font-size:14px; font-weight:700; text-decoration:none; }
 
 /* Popular Motors Section */
 .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
 .section-title { font-size:20px; font-weight:800; color:#0d0d0d; }
-.section-link { font-size:13px; color:#1847ED; font-weight:600; }
+.section-link { font-size:13px; color:#1847ED; font-weight:600; text-decoration:none; }
 .motors-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; }
 .motor-card { background:#fff; border:1px solid #e8e8f0; border-radius:12px; overflow:hidden; transition:all .2s; }
 .motor-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
@@ -65,7 +55,7 @@ tr:hover td { background:#fafbfd; }
 .motor-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
 .motor-price { font-size:14px; font-weight:800; color:#0d0d0d; }
 .motor-price-sub { font-size:11px; color:#9a9aaa; font-weight:400; }
-.btn-book { padding:7px 16px; background:#1847ED; color:#fff; font-size:12px; font-weight:700; border-radius:6px; border:none; cursor:pointer; }
+.btn-book { padding:7px 16px; background:#1847ED; color:#fff; font-size:12px; font-weight:700; border-radius:6px; border:none; cursor:pointer; text-decoration:none; display:inline-block; }
 .btn-book:hover { background:#1339c4; }
 
 /* Terms */
@@ -75,8 +65,6 @@ tr:hover td { background:#fafbfd; }
 .terms-list li strong { color:#0d0d0d; }
 
 @media(max-width:768px) {
-    .orders-table-wrap { overflow-x:auto; }
-    table { min-width:700px; }
     .motors-grid { grid-template-columns:repeat(2,1fr); }
 }
 </style>
@@ -89,78 +77,71 @@ tr:hover td { background:#fafbfd; }
         <p class="page-sub">Semua riwayat dan detail pesanan motor Anda dalam satu tempat. Pastikan semua data sudah benar.</p>
 
         @if($bookings->count() > 0)
-            <div class="orders-table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Kendaraan</th>
-                            <th>Kode Booking</th>
-                            <th>Tanggal Booking</th>
-                            <th>Status</th>
-                            <th>Harga</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($bookings as $booking)
-                            @php
-                                $motor = $booking->items->first()?->motor;
-                                $item = $booking->items->first();
-                                $statusMap = [
-                                    'pending' => ['label' => 'Belum bayar', 'class' => 'badge-pending'],
-                                    'confirmed' => ['label' => 'Sudah bayar', 'class' => 'badge-confirmed'],
-                                    'rejected' => ['label' => 'Ditolak', 'class' => 'badge-rejected'],
-                                    'cancelled' => ['label' => 'Dibatalkan', 'class' => 'badge-cancelled'],
-                                    'completed' => ['label' => 'Selesai rental', 'class' => 'badge-completed'],
-                                ];
-                                $st = $statusMap[$booking->status->value] ?? ['label' => $booking->status->label(), 'class' => 'badge-pending'];
-                                // Override with payment check
-                                if ($booking->payment && $booking->payment->isPaid()) {
-                                    if ($booking->status->value === 'confirmed') {
-                                        $st = ['label' => 'Sudah bayar', 'class' => 'badge-confirmed'];
-                                    } elseif ($booking->status->value === 'pending') {
-                                        $st = ['label' => 'Tunggu konfirmasi', 'class' => 'badge-pending'];
-                                    }
-                                }
-                            @endphp
+            <div class="orders-table-wrap table-scroll-wrapper">
+                <div class="table-scroll-body">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>
-                                    <div class="tbl-motor-wrap">
-                                        @if($motor)
-                                            <img src="{{ $motor->image_url }}" alt="{{ $motor->model }}" class="tbl-motor-img">
-                                            <div class="tbl-motor-info">
-                                                <div class="tbl-motor-name">{{ $motor->merk }} - {{ $motor->model }}</div>
-                                                <div class="tbl-motor-type">{{ $motor->category->name ?? '' }}</div>
-                                            </div>
-                                        @else
-                                            <span style="color:#9a9aaa">—</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="font-size:13px;font-weight:700;color:#0d0d0d">{{ $booking->booking_code }}</div>
-                                </td>
-                                <td>
-                                    <div style="font-size:13px;color:#0d0d0d">{{ $booking->start_date->format('d-m-Y') }}</div>
-                                    <div style="font-size:11px;color:#9a9aaa">{{ $item ? $item->total_days . ' hari' : '' }}</div>
-                                </td>
-                                <td>
-                                    <span class="badge {{ $st['class'] }}">{{ $st['label'] }}</span>
-                                </td>
-                                <td>
-                                    <div class="tbl-price">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</div>
-                                </td>
-                                <td>
-                                    @if($booking->status->value === 'pending' && (!$booking->payment || !$booking->payment->isPaid()))
-                                        <a href="{{ route('customer.payments.show', $booking) }}" class="btn-update">Update</a>
-                                    @else
-                                        <a href="{{ route('customer.bookings.show', $booking) }}" class="btn-detail">Detail</a>
-                                    @endif
-                                </td>
+                                <th>Kendaraan</th>
+                                <th>Kode Booking</th>
+                                <th>Tanggal Booking</th>
+                                <th>Status</th>
+                                <th>Harga</th>
+                                <th>Aksi</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($bookings as $booking)
+                                @php
+                                    $motor = $booking->items->first()?->motor;
+                                    $item = $booking->items->first();
+                                    $st = [
+                                        'label' => $booking->uiStatusLabel(),
+                                        'class' => $booking->uiStatusBadgeClass(),
+                                    ];
+                                    if ($booking->payment && $booking->payment->isPaid() && $booking->status->value === 'pending') {
+                                        $st = ['label' => 'Menunggu Konfirmasi', 'class' => 'badge-pending'];
+                                    }
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <div class="tbl-motor-wrap">
+                                            @if($motor)
+                                                <img src="{{ $motor->image_url }}" alt="{{ $motor->model }}" class="tbl-motor-img">
+                                                <div class="tbl-motor-info">
+                                                    <div class="tbl-motor-name">{{ $motor->merk }} - {{ $motor->model }}</div>
+                                                    <div class="tbl-motor-type">{{ $motor->category->name ?? '' }}</div>
+                                                </div>
+                                            @else
+                                                <span style="color:#9a9aaa">—</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:13px;font-weight:700;color:#0d0d0d">{{ $booking->booking_code }}</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:13px;color:#0d0d0d">{{ $booking->start_date->format('d-m-Y') }}</div>
+                                        <div style="font-size:11px;color:#9a9aaa">{{ $item ? $item->total_days . ' hari' : '' }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $st['class'] }}">{{ $st['label'] }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="tbl-price">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</div>
+                                    </td>
+                                    <td>
+                                        @if($booking->status->value === 'pending' && (!$booking->payment || !$booking->payment->isPaid()))
+                                            <a href="{{ route('customer.payments.show', $booking) }}" class="btn-update">Update</a>
+                                        @else
+                                            <a href="{{ route('customer.bookings.show', $booking) }}" class="btn-detail">Detail</a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div style="margin-bottom:32px">{{ $bookings->links() }}</div>
@@ -209,7 +190,7 @@ tr:hover td { background:#fafbfd; }
 
         <!-- Terms -->
         <div class="terms-section">
-            <h2 style="font-size:20px;font-weight:800;color:#0d0d0d;margin-bottom:8px">Syarat & Ketentuan Rental Motor</h2>
+            <h2 style="font-size:20px;font-weight:800;color:#0d0d0d;margin-bottom:8px">Syarat &amp; Ketentuan Rental Motor</h2>
             <p style="font-size:14px;color:#9a9aaa;margin-bottom:20px">Transparansi adalah kunci. Pastikan Anda memenuhi beberapa persyaratan dasar sebelum melakukan pemesanan.</p>
             <ol class="terms-list">
                 <li>Lakukan pemesanan minimal <strong>1x24 jam</strong> sebelum waktu penggunaan. Setelah pesanan dikonfirmasi, penyewa wajib melakukan konfirmasi pengambilan motor melalui nomor WhatsApp atau datang ke lokasi ED.RENT.</li>

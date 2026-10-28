@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Enums\FineStatus;
 use App\Enums\PickupMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
@@ -46,7 +48,9 @@ class Booking extends Model
     protected static function booted(): void
     {
         static::creating(function (Booking $booking) {
-            $booking->booking_code = 'BK-' . strtoupper(uniqid());
+            if (empty($booking->booking_code)) {
+                $booking->booking_code = 'BK-' . strtoupper(uniqid());
+            }
         });
     }
 
@@ -65,6 +69,11 @@ class Booking extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function fines(): HasManyThrough
+    {
+        return $this->hasManyThrough(Fine::class, BookingItem::class, 'booking_id', 'booking_item_id');
+    }
+
     public function isPending(): bool
     {
         return $this->status === BookingStatus::Pending;
@@ -73,6 +82,155 @@ class Booking extends Model
     public function isConfirmed(): bool
     {
         return $this->status === BookingStatus::Confirmed;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === BookingStatus::Rejected;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === BookingStatus::Cancelled;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === BookingStatus::Completed;
+    }
+
+    public function isAllItemsReturned(): bool
+    {
+        if ($this->items->isEmpty()) {
+            return false;
+        }
+
+        return $this->items->every(fn (BookingItem $item) => $item->isReturned());
+    }
+
+    public function hasUnpaidFines(): bool
+    {
+        return $this->fines()->where('status', FineStatus::Unpaid)->exists();
+    }
+
+    public function hasPendingFinePayments(): bool
+    {
+        return $this->fines()->where('fines.status', FineStatus::Unpaid)
+            ->whereHas('payments', function ($query) {
+                $query->where('status', \App\Enums\PaymentStatus::Pending)
+                    ->whereNotNull('payment_proof');
+            })->exists();
+    }
+
+    public function totalUnpaidFines(): float
+    {
+        return (float) $this->fines()->where('status', FineStatus::Unpaid)->sum('amount');
+    }
+
+    public function totalFines(): float
+    {
+        return (float) $this->fines()->sum('amount');
+    }
+
+    public function canBeReturned(): bool
+    {
+        return $this->isConfirmed() && ! $this->isAllItemsReturned();
+    }
+
+    public function isEligibleForCompletion(): bool
+    {
+        return $this->isConfirmed()
+            && $this->isAllItemsReturned()
+            && ! $this->hasUnpaidFines()
+            && ! $this->hasPendingFinePayments();
+    }
+
+    public function isAwaitingReturnConfirmation(): bool
+    {
+        return $this->isConfirmed() && $this->isAllItemsReturned();
+    }
+
+    public function uiStatusLabel(): string
+    {
+        if ($this->isConfirmed()) {
+            if ($this->isAllItemsReturned()) {
+                return 'Menunggu Konfirmasi Pengembalian';
+            }
+
+            return 'Sedang Disewa';
+        }
+
+        if ($this->isCompleted()) {
+            return 'Selesai Rental';
+        }
+
+        if ($this->isPending()) {
+            return 'Menunggu';
+        }
+
+        if ($this->isRejected()) {
+            return 'Ditolak';
+        }
+
+        if ($this->isCancelled()) {
+            return 'Dibatalkan';
+        }
+
+        return $this->status->label();
+    }
+
+    public function uiStatusBadgeClass(): string
+    {
+        if ($this->isConfirmed()) {
+            if ($this->isAllItemsReturned()) {
+                return 'badge-pending';
+            }
+
+            return 'badge-confirmed';
+        }
+
+        if ($this->isCompleted()) {
+            return 'badge-completed';
+        }
+
+        if ($this->isPending()) {
+            return 'badge-pending';
+        }
+
+        if ($this->isRejected()) {
+            return 'badge-rejected';
+        }
+
+        if ($this->isCancelled()) {
+            return 'badge-cancelled';
+        }
+
+        return 'badge-pending';
+    }
+
+    public function getCompletionBlockReason(): ?string
+    {
+        if ($this->isCompleted()) {
+            return 'Pemesanan sudah berstatus selesai.';
+        }
+
+        if (! $this->isConfirmed()) {
+            return 'Pemesanan belum berstatus dikonfirmasi.';
+        }
+
+        if (! $this->isAllItemsReturned()) {
+            return 'Seluruh motor harus dikonfirmasi sudah kembali terlebih dahulu.';
+        }
+
+        if ($this->hasPendingFinePayments()) {
+            return 'Pembayaran denda masih menunggu konfirmasi verifikasi Admin.';
+        }
+
+        if ($this->hasUnpaidFines()) {
+            return 'Selesaikan seluruh pembayaran denda terlebih dahulu.';
+        }
+
+        return null;
     }
 
     public function getFormattedTotalAttribute(): string
