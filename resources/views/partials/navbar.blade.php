@@ -4,7 +4,11 @@
         <a href="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : route('home') }}" class="nav-brand">ED<span>.</span>RENT</a>
 
         <ul class="nav-links">
-            <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Home</a></li>
+            @else
+                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
+            @endif
             @auth
                 @if(auth()->user()->isAdmin())
                     <li><a href="{{ route('admin.motors.index') }}" class="{{ request()->routeIs('admin.motors.*') ? 'active' : '' }}">Daftar Kendaraan</a></li>
@@ -89,7 +93,11 @@
         <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         <div style="font-size:20px;font-weight:800;color:#0d0d0d">ED<span style="color:#1847ED">.</span>RENT</div>
         <div class="mobile-menu-links">
-            <a href="{{ route('home') }}">Home</a>
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Home</a>
+            @else
+                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
+            @endif
             @auth
                 @if(auth()->user()->isAdmin())
                     <a href="{{ route('admin.motors.index') }}" class="{{ request()->routeIs('admin.motors.*') ? 'active' : '' }}">Daftar Kendaraan</a>

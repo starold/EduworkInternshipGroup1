@@ -246,13 +246,21 @@
                                     </p>
                                     <small style="color:#8a8a9a">Dikirim pada: {{ $item->review->created_at->format('d M Y, H:i') }} · <em>Ulasan Anda telah tersimpan</em></small>
                                 </div>
+                            @elseif($booking->isPending() || ($booking->payment && ! $booking->payment->isPaid()))
+                                <p style="font-size:13px;color:#ca8a04;margin:0">
+                                    🔒 Form review belum tersedia karena pembayaran masih menunggu konfirmasi.
+                                </p>
                             @elseif(! $item->isReturned())
                                 <p style="font-size:13px;color:#8a8a9a;margin:0">
                                     🔒 Form review akan terbuka secara otomatis setelah motor dikonfirmasi kembali oleh admin.
                                 </p>
-                            @elseif($item->hasUnpaidFines())
+                            @elseif($item->hasUnpaidFines() || $booking->hasPendingFinePayments())
                                 <p style="font-size:13px;color:#dc2626;margin:0">
                                     ⚠ Form review akan terbuka setelah seluruh denda untuk motor ini diselesaikan.
+                                </p>
+                            @elseif(! $booking->isCompleted())
+                                <p style="font-size:13px;color:#8a8a9a;margin:0">
+                                    🔒 Form review akan terbuka setelah pemesanan selesai.
                                 </p>
                             @else
                                 <!-- Review submission form -->
