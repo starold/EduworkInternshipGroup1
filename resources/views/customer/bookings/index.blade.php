@@ -99,9 +99,6 @@ tr:hover td { background:#fafbfd; }
                                         'label' => $booking->uiStatusLabel(),
                                         'class' => $booking->uiStatusBadgeClass(),
                                     ];
-                                    if ($booking->payment && $booking->payment->isPaid() && $booking->status->value === 'pending') {
-                                        $st = ['label' => 'Menunggu Konfirmasi', 'class' => 'badge-pending'];
-                                    }
                                 @endphp
                                 <tr>
                                     <td>
@@ -111,6 +108,11 @@ tr:hover td { background:#fafbfd; }
                                                 <div class="tbl-motor-info">
                                                     <div class="tbl-motor-name">{{ $motor->merk }} - {{ $motor->model }}</div>
                                                     <div class="tbl-motor-type">{{ $motor->category->name ?? '' }}</div>
+                                                    @if($booking->isConfirmed() && ! $booking->isAllItemsReturned())
+                                                        <small style="display:block;color:#1d4ed8;font-weight:600;font-size:11px;margin-top:2px">
+                                                            ℹ️ {{ $booking->getDeliveryInstructions() }}
+                                                        </small>
+                                                    @endif
                                                 </div>
                                             @else
                                                 <span style="color:#9a9aaa">—</span>
@@ -131,8 +133,8 @@ tr:hover td { background:#fafbfd; }
                                         <div class="tbl-price">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</div>
                                     </td>
                                     <td>
-                                        @if($booking->status->value === 'pending' && (!$booking->payment || !$booking->payment->isPaid()))
-                                            <a href="{{ route('customer.payments.show', $booking) }}" class="btn-update">Update</a>
+                                        @if($booking->isWaitingPayment())
+                                            <a href="{{ route('customer.payments.show', $booking) }}" class="btn-update">Bayar</a>
                                         @else
                                             <a href="{{ route('customer.bookings.show', $booking) }}" class="btn-detail">Detail</a>
                                         @endif

@@ -165,7 +165,11 @@ class Booking extends Model
         }
 
         if ($this->isPending()) {
-            return 'Menunggu';
+            if ($this->payment && $this->payment->isPaid()) {
+                return 'Menunggu Konfirmasi';
+            }
+
+            return 'Menunggu Pembayaran';
         }
 
         if ($this->isRejected()) {
@@ -236,5 +240,47 @@ class Booking extends Model
     public function getFormattedTotalAttribute(): string
     {
         return 'Rp' . number_format($this->total_price, 0, ',', '.');
+    }
+
+    public function isWaitingPayment(): bool
+    {
+        return $this->isPending() && (! $this->payment || ! $this->payment->isPaid());
+    }
+
+    public function isWaitingConfirmation(): bool
+    {
+        return $this->isPending() && (bool) ($this->payment && $this->payment->isPaid());
+    }
+
+    public function isRented(): bool
+    {
+        return $this->isConfirmed() && ! $this->isAllItemsReturned();
+    }
+
+    public function getDeliveryInstructions(): ?string
+    {
+        if (! $this->isConfirmed()) {
+            return null;
+        }
+
+        if ($this->pickup_method === PickupMethod::Delivery || $this->pickup_method?->value === 'delivery') {
+            return 'Silahkan tunggu motor anda datang. (maksimal 1x24 jam)';
+        }
+
+        return 'Silahkan datang ke konter langsung.';
+    }
+
+    public function getPaymentDeadline(): \Carbon\Carbon
+    {
+        return $this->created_at ? $this->created_at->copy()->addHours(24) : now()->addHours(24);
+    }
+
+    public function isPaymentExpired(): bool
+    {
+        if ($this->payment && $this->payment->isPaid()) {
+            return false;
+        }
+
+        return now()->greaterThan($this->getPaymentDeadline());
     }
 }

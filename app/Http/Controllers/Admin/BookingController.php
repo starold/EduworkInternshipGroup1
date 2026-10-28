@@ -25,7 +25,21 @@ class BookingController extends Controller
     public function index(Request $request): View
     {
         $bookings = Booking::with(['user', 'items.motor.category', 'payment'])
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $status = $request->input('status');
+                if ($status === 'pending_payment') {
+                    $query->where('status', BookingStatus::Pending)
+                        ->where(function ($q) {
+                            $q->whereDoesntHave('payment')
+                                ->orWhereHas('payment', fn ($pq) => $pq->where('status', '!=', PaymentStatus::Paid));
+                        });
+                } elseif ($status === 'pending_confirmation') {
+                    $query->where('status', BookingStatus::Pending)
+                        ->whereHas('payment', fn ($pq) => $pq->where('status', PaymentStatus::Paid));
+                } else {
+                    $query->where('status', $status);
+                }
+            })
             ->when($request->filled('category'), function ($query) use ($request) {
                 $query->whereHas('items.motor', fn ($motorQuery) => $motorQuery->where('motor_category_id', $request->input('category')));
             })
@@ -67,16 +81,14 @@ class BookingController extends Controller
     public function confirm(Booking $booking): RedirectResponse
     {
         abort_if(! $booking->isPending(), 403, 'Booking tidak dalam status pending.');
+        abort_if(
+            ! $booking->payment || ! $booking->payment->isPaid(),
+            422,
+            'Pemesanan tidak dapat dikonfirmasi karena status pembayaran belum selesai.'
+        );
 
         DB::transaction(function () use ($booking) {
             $booking->update(['status' => BookingStatus::Confirmed]);
-
-            if ($booking->payment) {
-                $booking->payment->update([
-                    'status' => PaymentStatus::Paid,
-                    'paid_at' => now(),
-                ]);
-            }
 
             // Synchronize rental records for each booking item
             foreach ($booking->items as $item) {
@@ -93,17 +105,22 @@ class BookingController extends Controller
             }
         });
 
-        return back()->with('success', 'Booking berhasil dikonfirmasi.');
+        return back()->with('success', 'Booking berhasil dikonfirmasi. Status pesanan kini Sedang Disewa.');
     }
 
     public function reject(Request $request, Booking $booking): RedirectResponse
     {
-        abort_if(! $booking->isPending(), 403);
+        abort_if(! $booking->isPending(), 403, 'Booking tidak dalam status pending.');
+        abort_if(
+            ! $booking->payment || ! $booking->payment->isPaid(),
+            422,
+            'Pemesanan tidak dapat ditolak pada tahap ini karena status pembayaran belum selesai.'
+        );
 
         DB::transaction(function () use ($booking, $request) {
             $booking->update([
                 'status' => BookingStatus::Rejected,
-                'notes' => $request->reason,
+                'notes' => $request->input('reason') ?: $request->input('notes'),
             ]);
 
             foreach ($booking->items as $item) {
@@ -116,6 +133,47 @@ class BookingController extends Controller
         });
 
         return back()->with('success', 'Booking berhasil ditolak.');
+    }
+
+    public function verifyPayment(Booking $booking): RedirectResponse
+    {
+        abort_if(! $booking->isPending(), 403, 'Booking tidak dalam status pending.');
+
+        $payment = $booking->payment;
+        abort_if(! $payment, 404, 'Data pembayaran tidak ditemukan.');
+        abort_if(! $payment->payment_proof, 422, 'Bukti pembayaran belum diunggah.');
+        abort_if($payment->isPaid(), 422, 'Pembayaran sudah dikonfirmasi lunas.');
+
+        $payment->update([
+            'status' => PaymentStatus::Paid,
+            'paid_at' => now(),
+            'rejection_reason' => null,
+        ]);
+
+        return back()->with('success', 'Pembayaran berhasil dikonfirmasi lunas. Status pesanan kini Menunggu Konfirmasi.');
+    }
+
+    public function rejectPayment(Request $request, Booking $booking): RedirectResponse
+    {
+        abort_if(! $booking->isPending(), 403, 'Booking tidak dalam status pending.');
+
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ], [
+            'rejection_reason.required' => 'Alasan penolakan bukti pembayaran wajib diisi.',
+        ]);
+
+        $payment = $booking->payment;
+        abort_if(! $payment, 404, 'Data pembayaran tidak ditemukan.');
+        abort_if(! $payment->payment_proof, 422, 'Bukti pembayaran belum diunggah.');
+        abort_if($payment->isPaid(), 422, 'Pembayaran yang sudah lunas tidak dapat ditolak.');
+
+        $payment->update([
+            'status' => PaymentStatus::Failed,
+            'rejection_reason' => $request->input('rejection_reason'),
+        ]);
+
+        return back()->with('success', 'Bukti pembayaran berhasil ditolak. Pengguna harus mengunggah ulang bukti pembayaran sebelum tenggat waktu.');
     }
 
     public function confirmReturn(

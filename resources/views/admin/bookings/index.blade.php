@@ -64,8 +64,9 @@
         <label for="status-filter">Status</label>
         <select id="status-filter" name="status" class="filter-input">
             <option value="">Semua</option>
-            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu</option>
-            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
+            <option value="pending_payment" {{ request('status') === 'pending_payment' ? 'selected' : '' }}>Menunggu Pembayaran</option>
+            <option value="pending_confirmation" {{ request('status') === 'pending_confirmation' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Sedang Disewa (Dikonfirmasi)</option>
             <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
             <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
             <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai</option>

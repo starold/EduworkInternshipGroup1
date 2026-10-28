@@ -76,6 +76,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
     Route::post('/bookings/{booking}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::post('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])->name('bookings.reject');
+    Route::post('/bookings/{booking}/payments/verify', [AdminBookingController::class, 'verifyPayment'])->name('bookings.payments.verify');
+    Route::post('/bookings/{booking}/payments/reject', [AdminBookingController::class, 'rejectPayment'])->name('bookings.payments.reject');
     Route::post('/bookings/{booking}/items/{item}/return', [AdminBookingController::class, 'confirmReturn'])->name('bookings.return');
     Route::post('/bookings/{booking}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete');
 

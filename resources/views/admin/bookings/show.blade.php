@@ -402,28 +402,126 @@
             </div>
         @endif
 
+        @if($booking->isConfirmed())
+            <div class="card" style="border:1.5px solid #bfdbfe;background:#eff6ff">
+                <h3 class="card-title" style="color:#1e40af;margin-bottom:8px">Instruksi Pengambilan (Sedang Disewa)</h3>
+                <p style="font-size:13px;color:#1e3a8a;margin:0;line-height:1.6">
+                    <strong>Metode:</strong> {{ $booking->pickup_method->label() }}<br>
+                    <strong>Keterangan Pelanggan:</strong><br>
+                    <span style="font-weight:700">"{{ $booking->getDeliveryInstructions() }}"</span>
+                </p>
+            </div>
+        @endif
+
         <!-- Admin Action for Pending Booking -->
         @if($booking->isPending())
+            <!-- Verifikasi Pembayaran Sewa -->
+            <div class="card" style="border:1.5px solid #e2e4e9">
+                <h3 class="card-title">
+                    <span>Verifikasi Pembayaran Sewa</span>
+                    @if($booking->payment && $booking->payment->isPaid())
+                        <span class="badge badge-completed">Sudah Lunas</span>
+                    @elseif($booking->payment && $booking->payment->isPending() && $booking->payment->payment_proof)
+                        <span class="badge badge-pending">Menunggu Verifikasi</span>
+                    @elseif($booking->payment && $booking->payment->isFailed())
+                        <span class="badge badge-rejected">Bukti Ditolak</span>
+                    @else
+                        <span class="badge badge-unpaid">Belum Ada Bukti</span>
+                    @endif
+                </h3>
+
+                <div class="info-row"><span class="lbl">Total Tagihan</span><span class="val" style="font-weight:700">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</span></div>
+                @if($booking->payment)
+                    <div class="info-row"><span class="lbl">Metode Bayar</span><span class="val">{{ $booking->payment->payment_method ?? 'Transfer Bank' }}</span></div>
+                    <div class="info-row"><span class="lbl">Kode Bayar</span><span class="val">{{ $booking->payment->payment_code }}</span></div>
+                    @if($booking->payment->paid_at)
+                        <div class="info-row"><span class="lbl">Waktu Lunas</span><span class="val" style="color:#16a34a">{{ $booking->payment->paid_at->format('d M Y, H:i') }}</span></div>
+                    @endif
+                @endif
+
+                @if($booking->payment && $booking->payment->isPending() && $booking->payment->payment_proof)
+                    <div style="margin:14px 0;padding:12px;background:#f8f9fb;border-radius:8px;text-align:center">
+                        <span style="display:block;font-size:12px;color:#667;margin-bottom:8px">Bukti Transfer Pelanggan:</span>
+                        <a href="{{ $booking->payment->proof_url }}" target="_blank">
+                            <img src="{{ $booking->payment->proof_url }}" alt="Bukti Transfer" style="max-height:160px;margin:0 auto;border-radius:6px;border:1px solid #dcdfe5;display:block">
+                        </a>
+                        <small style="display:block;color:#8a8a9a;margin-top:6px">Klik gambar untuk melihat ukuran penuh</small>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top:12px">
+                        <form method="POST" action="{{ route('admin.bookings.payments.verify', $booking) }}">
+                            @csrf
+                            <button type="submit" class="btn-confirm" style="width:100%" onclick="return confirm('Konfirmasi bahwa pembayaran sewa telah diterima dan lunas?')">
+                                &check; Konfirmasi Pembayaran Lunas
+                            </button>
+                        </form>
+                        <button type="button" class="btn-reject" style="width:100%" onclick="openRejectRentalPaymentModal()">
+                            &cross; Tolak Bukti Pembayaran
+                        </button>
+                    </div>
+                @elseif($booking->payment && $booking->payment->isFailed())
+                    <div style="margin:12px 0;padding:10px;background:#fee2e2;border:1px solid #fecaca;border-radius:8px;font-size:12px;color:#991b1b">
+                        <strong>Bukti pembayaran ditolak:</strong> {{ $booking->payment->rejection_reason }}<br>
+                        <span style="color:#b91c1c">Menunggu pelanggan upload ulang bukti bayar sebelum tenggat waktu.</span>
+                    </div>
+                    @if($booking->payment->payment_proof)
+                        <div style="text-align:center;margin-top:6px">
+                            <a href="{{ $booking->payment->proof_url }}" target="_blank" style="font-size:12px;color:#dc2626">Lihat Bukti yang Ditolak ↗</a>
+                        </div>
+                    @endif
+                @elseif($booking->payment && $booking->payment->isPaid())
+                    <div style="margin:12px 0;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534">
+                        &check; Pembayaran sewa telah selesai diverifikasi.
+                    </div>
+                    @if($booking->payment->payment_proof)
+                        <div style="text-align:center;margin-top:4px">
+                            <a href="{{ $booking->payment->proof_url }}" target="_blank" style="font-size:12px;color:#1847ED">Lihat Bukti Transfer ↗</a>
+                        </div>
+                    @endif
+                @else
+                    <div style="margin:12px 0;padding:10px;background:#fefce8;border:1px solid #fef08a;border-radius:8px;font-size:12px;color:#854d0e">
+                        Pelanggan belum mengunggah bukti pembayaran.<br>
+                        Batas Waktu: {{ $booking->getPaymentDeadline()->format('d M Y, H:i') }}
+                    </div>
+                @endif
+            </div>
+
+            <!-- Tindakan Pemesanan -->
             <div class="card">
-                <h3 class="card-title">Tindakan Admin</h3>
+                <h3 class="card-title">Tindakan Pemesanan</h3>
                 <div class="action-buttons">
-                    <form method="POST" action="{{ route('admin.bookings.confirm', $booking) }}">
-                        @csrf
-                        <button type="submit" class="btn-confirm" style="width:100%" onclick="return confirm('Konfirmasi booking ini?')">
+                    @if($booking->payment && $booking->payment->isPaid())
+                        <div style="margin-bottom:10px;padding:8px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:12px;color:#166534">
+                            &check; Status Menunggu Konfirmasi: Anda dapat mengonfirmasi atau menolak pesanan.
+                        </div>
+                        <form method="POST" action="{{ route('admin.bookings.confirm', $booking) }}">
+                            @csrf
+                            <button type="submit" class="btn-confirm" style="width:100%" onclick="return confirm('Konfirmasi booking ini? Status pesanan akan langsung menjadi Sedang Disewa.')">
+                                &check; Konfirmasi Pesanan (Sedang Disewa)
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{{ route('admin.bookings.reject', $booking) }}" style="margin-top:10px">
+                            @csrf
+                            <div style="margin-bottom:10px">
+                                <label style="font-size:13px;font-weight:600;color:#4a4a5a;display:block;margin-bottom:6px">Alasan penolakan:</label>
+                                <textarea name="reason" style="width:100%;padding:10px;border:1.5px solid #e2e4e9;border-radius:8px;font-size:13px" rows="3" placeholder="Tulis alasan penolakan pesanan..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-reject" style="width:100%" onclick="return confirm('Tolak booking ini?')">
+                                &cross; Tolak Pesanan
+                            </button>
+                        </form>
+                    @else
+                        <div style="margin-bottom:10px;padding:10px;background:#fef9c3;border:1px solid #fef08a;border-radius:8px;font-size:12px;color:#854d0e;line-height:1.5">
+                            <strong>🔒 Konfirmasi/Tolak Terkunci:</strong> Admin tidak dapat konfirmasi atau tolak pemesanan jika status pembayaran belum selesai.
+                        </div>
+                        <button type="button" class="btn-confirm-disabled" style="width:100%" disabled>
                             &check; Konfirmasi Pesanan
                         </button>
-                    </form>
-
-                    <form method="POST" action="{{ route('admin.bookings.reject', $booking) }}">
-                        @csrf
-                        <div style="margin-bottom:10px">
-                            <label style="font-size:13px;font-weight:600;color:#4a4a5a;display:block;margin-bottom:6px">Alasan penolakan:</label>
-                            <textarea name="reason" style="width:100%;padding:10px;border:1.5px solid #e2e4e9;border-radius:8px;font-size:13px" rows="3" placeholder="Tulis alasan penolakan..."></textarea>
-                        </div>
-                        <button type="submit" class="btn-reject" style="width:100%" onclick="return confirm('Tolak booking ini?')">
+                        <button type="button" class="btn-confirm-disabled" style="width:100%;margin-top:6px" disabled>
                             &cross; Tolak Pesanan
                         </button>
-                    </form>
+                    @endif
                 </div>
             </div>
         @endif
@@ -547,9 +645,39 @@
     </div>
 </div>
 
+<!-- Modal Tolak Pembayaran Sewa -->
+<div id="rejectRentalPaymentModal" class="custom-modal">
+    <div class="modal-content-card">
+        <div class="modal-header-line">
+            <h3>Tolak Bukti Pembayaran Sewa</h3>
+            <button type="button" class="modal-close-btn" onclick="closeRejectRentalPaymentModal()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.bookings.payments.reject', $booking) }}">
+            @csrf
+            <div class="form-group">
+                <label>Alasan Penolakan Bukti Pembayaran <span style="color:#e74c3c">*</span></label>
+                <textarea name="rejection_reason" rows="3" required placeholder="Jelaskan alasan penolakan (misal: nominal transfer tidak sesuai, bukti buram/tidak valid, dll)..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeRejectRentalPaymentModal()">Batal</button>
+                <button type="submit" class="btn-primary" style="background:#dc2626">Tolak Bukti Pembayaran</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @include('partials.fine-detail-modal')
 
 <script>
+function openRejectRentalPaymentModal() {
+    document.getElementById('rejectRentalPaymentModal').classList.add('active');
+}
+
+function closeRejectRentalPaymentModal() {
+    document.getElementById('rejectRentalPaymentModal').classList.remove('active');
+}
 function openReturnModal(itemId, motorName) {
     document.getElementById('returnModalMotorLabel').innerText = 'Motor: ' + motorName;
     var form = document.getElementById('returnConfirmForm');

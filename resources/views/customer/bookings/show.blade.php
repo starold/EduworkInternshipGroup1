@@ -68,6 +68,65 @@
                 <a href="{{ route('customer.bookings.index') }}" style="color:#1847ED;font-size:14px;font-weight:600;text-decoration:none">← Kembali ke Pesanan</a>
             </div>
 
+            @if($booking->isConfirmed())
+                <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+                    <span style="font-size:24px;line-height:1">🏍️</span>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:#1e40af;margin-bottom:4px">
+                            Pemesanan Diterima — Status: Sedang Disewa
+                        </div>
+                        <p style="font-size:14px;color:#1e3a8a;margin:0;line-height:1.5;font-weight:600">
+                            {{ $booking->getDeliveryInstructions() }}
+                        </p>
+                    </div>
+                </div>
+            @endif
+
+            @if($booking->isWaitingConfirmation())
+                <div style="background:#fefce8;border:1.5px solid #fef08a;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+                    <span style="font-size:24px;line-height:1">⏳</span>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:#854d0e;margin-bottom:4px">
+                            Pembayaran Terverifikasi — Status: Menunggu Konfirmasi
+                        </div>
+                        <p style="font-size:13px;color:#713f12;margin:0;line-height:1.5">
+                            Pembayaran Anda telah berhasil diverifikasi oleh Admin. Mohon tunggu konfirmasi penerimaan pesanan dari pihak rental.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
+            @if($booking->isWaitingPayment())
+                @if($booking->payment && $booking->payment->isFailed())
+                    <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+                        <span style="font-size:24px;line-height:1">⚠</span>
+                        <div>
+                            <div style="font-weight:700;font-size:15px;color:#991b1b;margin-bottom:4px">
+                                Bukti Pembayaran Ditolak Admin
+                            </div>
+                            <p style="font-size:13px;color:#b91c1c;margin:0 0 6px 0;line-height:1.5">
+                                <strong>Alasan:</strong> {{ $booking->payment->rejection_reason }}
+                            </p>
+                            <p style="font-size:12px;color:#7f1d1d;margin:0">
+                                Silakan upload ulang bukti pembayaran sebelum batas waktu berakhir.
+                            </p>
+                        </div>
+                    </div>
+                @elseif($booking->payment && $booking->payment->payment_proof)
+                    <div style="background:#fffbeb;border:1.5px solid #fef3c7;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+                        <span style="font-size:24px;line-height:1">📄</span>
+                        <div>
+                            <div style="font-weight:700;font-size:15px;color:#92400e;margin-bottom:4px">
+                                Bukti Transfer Telah Diunggah
+                            </div>
+                            <p style="font-size:13px;color:#b45309;margin:0;line-height:1.5">
+                                Bukti pembayaran Anda sedang menunggu verifikasi oleh Admin.
+                            </p>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             <!-- Booking and Customer info -->
             <div class="card">
                 <h3 class="card-title">
@@ -343,8 +402,20 @@
                         </div>
                     @endif
 
-                    @if($booking->isPending() && $booking->payment && ! $booking->payment->isPaid() && ! $booking->payment->payment_proof)
-                        <a href="{{ route('customer.payments.show', $booking) }}" class="btn-action btn-pay">Bayar Sekarang</a>
+                    @if($booking->isWaitingPayment())
+                        @if($booking->payment && $booking->payment->isFailed())
+                            <a href="{{ route('customer.payments.show', $booking) }}" class="btn-action btn-pay" style="background:#dc2626;text-decoration:none">Upload Ulang Bukti Bayar</a>
+                        @elseif(! $booking->payment || ! $booking->payment->payment_proof)
+                            <a href="{{ route('customer.payments.show', $booking) }}" class="btn-action btn-pay" style="text-decoration:none">Bayar Sekarang</a>
+                        @else
+                            <div style="margin-top:12px;padding:10px;background:#fefce8;border:1px solid #fef08a;border-radius:8px;font-size:12px;color:#854d0e;text-align:center">
+                                Menunggu verifikasi pembayaran oleh Admin
+                            </div>
+                        @endif
+                    @elseif($booking->isWaitingConfirmation())
+                        <div style="margin-top:12px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;text-align:center">
+                            ✓ Pembayaran selesai diverifikasi. Menunggu konfirmasi pesanan oleh Admin.
+                        </div>
                     @endif
 
                     @if($booking->isPending())
