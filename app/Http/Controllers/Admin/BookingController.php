@@ -7,6 +7,7 @@ use App\Enums\MotorStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\MotorCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +17,30 @@ class BookingController extends Controller
 {
     public function index(Request $request): View
     {
-        $bookings = Booking::with(['user', 'items.motor', 'payment'])
-            ->when($request->status, fn ($q) => $q->where('status', $request->status))
-            ->when($request->search, fn ($q) => $q->where('booking_code', 'like', "%{$request->search}%")
-                ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$request->search}%")))
+        $bookings = Booking::with(['user', 'items.motor.category', 'payment'])
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
+            ->when($request->filled('category'), function ($query) use ($request) {
+                $query->whereHas('items.motor', fn ($motorQuery) => $motorQuery->where('motor_category_id', $request->input('category')));
+            })
+            ->when($request->filled('start_date'), fn ($query) => $query->whereDate('start_date', $request->input('start_date')))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = '%'.$request->input('search').'%';
+
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->where('booking_code', 'like', $search)
+                        ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', $search))
+                        ->orWhereHas('items.motor', function ($motorQuery) use ($search) {
+                            $motorQuery->where('merk', 'like', $search)
+                                ->orWhere('model', 'like', $search);
+                        });
+                });
+            })
             ->latest()
             ->paginate(15);
 
-        return view('admin.bookings.index', compact('bookings'));
+        $categories = MotorCategory::orderBy('name')->get();
+
+        return view('admin.bookings.index', compact('bookings', 'categories'));
     }
 
     public function show(Booking $booking): View

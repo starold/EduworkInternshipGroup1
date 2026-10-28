@@ -143,7 +143,7 @@
                         </div>
                     @endif
 
-                    @if($booking->isPending() && $booking->payment && !$booking->payment->isPaid())
+                    @if($booking->isPending() && $booking->payment && !$booking->payment->isPaid() && !$booking->payment->payment_proof)
                         <a href="{{ route('customer.payments.show', $booking) }}" class="btn-action btn-pay">Bayar Sekarang</a>
                     @endif
 

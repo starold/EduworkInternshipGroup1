@@ -5,15 +5,15 @@
 
 @push('styles')
 <style>
-.form-card { background:#fff; border:1px solid #e2e4e9; border-radius:12px; padding:32px; max-width:720px; }
+.form-card { width:100%; background:#fff; border:1px solid #e2e4e9; border-radius:12px; padding:32px; max-width:720px; }
 .form-group { margin-bottom:22px; }
 .form-label { display:block; font-size:13px; font-weight:600; color:#4a4a5a; margin-bottom:8px; }
 .form-label span { color:#e74c3c; }
-.form-control { width:100%; padding:11px 14px; border:1.5px solid #e2e4e9; border-radius:8px; font-size:14px; font-family:'Inter',sans-serif; color:#1a1a2e; outline:none; transition:all .2s; }
+.form-control { width:100%; max-width:100%; min-width:0; padding:11px 14px; border:1.5px solid #e2e4e9; border-radius:8px; font-size:14px; font-family:'Inter',sans-serif; color:#1a1a2e; outline:none; transition:all .2s; }
 .form-control:focus { border-color:#4758D6; box-shadow:0 0 0 3px rgba(71,88,214,.1); }
 .form-control.is-invalid { border-color:#e74c3c; }
 .invalid-feedback { color:#e74c3c; font-size:12px; margin-top:6px; display:block; }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.form-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 .form-actions { display:flex; gap:12px; margin-top:8px; }
 .btn-submit { padding:12px 28px; background:#4758D6; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; }
 .btn-submit:hover { background:#3847B5; }
