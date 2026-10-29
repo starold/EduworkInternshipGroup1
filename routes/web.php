@@ -44,6 +44,11 @@ Route::middleware('auth')->group(function () {
     // Payments
     Route::get('/bookings/{booking}/payment', [PaymentController::class, 'show'])->name('customer.payments.show');
     Route::post('/bookings/{booking}/payment/proof', [PaymentController::class, 'uploadProof'])->name('customer.payments.upload');
+    Route::get('/bookings/{booking}/payment/success', [PaymentController::class, 'success'])->name('customer.payments.success');
+    Route::get('/bookings/{booking}/payment/expired', [PaymentController::class, 'expired'])->name('customer.payments.expired');
+
+    // Profile update
+    Route::put('/profile', [HomeController::class, 'updateProfile'])->name('profile.update');
 });
 
 /*
@@ -60,6 +65,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Bookings
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
+    Route::put('/bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.updateStatus');
     Route::post('/bookings/{booking}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::post('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])->name('bookings.reject');
 });

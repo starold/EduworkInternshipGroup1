@@ -70,4 +70,22 @@ class BookingController extends Controller
 
         return back()->with('success', 'Booking berhasil ditolak.');
     }
+
+    public function updateStatus(Request $request, Booking $booking): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string'],
+        ]);
+
+        $booking->update(['status' => $validated['status']]);
+
+        if ($validated['status'] === 'confirmed' && $booking->payment) {
+            $booking->payment->update([
+                'status' => PaymentStatus::Paid,
+                'paid_at' => now(),
+            ]);
+        }
+
+        return back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
 }

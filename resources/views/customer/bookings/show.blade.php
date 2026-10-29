@@ -99,11 +99,11 @@
                 <div class="sidebar-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                     <div>
                         <div style="font-size:12px;color:#8a8a9a;margin-bottom:6px">Tanggal sewa</div>
-                        <div style="font-size:14px;font-weight:700;color:#1a1a2e">{{ $booking->start_date->translatedFormat('D, d M Y') }}</div>
+                        <div style="font-size:14px;font-weight:700;color:#1a1a2e">{{ $booking->start_date->translatedFormat('D, d M Y') }} · 17:00</div>
                     </div>
                     <div>
-                        <div style="font-size:12px;color:#8a8a9a;margin-bottom:6px">Selesai sewa</div>
-                        <div style="font-size:14px;font-weight:700;color:#1a1a2e">{{ $booking->end_date->translatedFormat('D, d M Y') }}</div>
+                        <div style="font-size:12px;color:#e74c3c;font-weight:700;margin-bottom:6px">Deadline Pemakaian (Selesai)</div>
+                        <div style="font-size:14px;font-weight:800;color:#1a1a2e">{{ $booking->end_date->translatedFormat('D, d M Y') }} · 17:00</div>
                     </div>
                 </div>
             </div>
@@ -143,6 +143,14 @@
                         </div>
                     @endif
 
+                    @if($booking->isPending() && (!$booking->payment || !$booking->payment->isPaid()))
+                        <div style="background:#fff3cd;border:1px solid #ffeeba;border-radius:10px;padding:14px;margin-bottom:16px;text-align:center">
+                            <div style="font-size:11px;font-weight:700;color:#856404;text-transform:uppercase;margin-bottom:4px">⏱ Batas Waktu Pembayaran</div>
+                            <div id="bookingPaymentTimer" style="font-size:18px;font-weight:800;color:#d97706">24j : 00m : 00d</div>
+                            <div style="font-size:11px;color:#856404;margin-top:2px">Selesaikan sebelum waktu habis</div>
+                        </div>
+                    @endif
+
                     @if($booking->isPending() && $booking->payment && !$booking->payment->isPaid())
                         <a href="{{ route('customer.payments.show', $booking) }}" class="btn-action btn-pay">Bayar Sekarang</a>
                     @endif
@@ -158,4 +166,30 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+@if($booking->isPending() && (!$booking->payment || !$booking->payment->isPaid()))
+<script>
+@php
+    $deadline = $booking->payment_deadline ?? $booking->created_at->addHours(24);
+@endphp
+const expiry = new Date('{{ $deadline->toIso8601String() }}');
+function updateBookingTimer() {
+    const diff = expiry - new Date();
+    if (diff <= 0) {
+        const el = document.getElementById('bookingPaymentTimer');
+        if (el) el.textContent = 'WAKTU HABIS';
+        return;
+    }
+    const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+    const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+    const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+    const el = document.getElementById('bookingPaymentTimer');
+    if (el) el.textContent = `${h}j : ${m}m : ${s}d`;
+}
+setInterval(updateBookingTimer, 1000);
+updateBookingTimer();
+</script>
+@endif
+@endpush
 @endsection

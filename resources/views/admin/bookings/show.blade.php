@@ -56,8 +56,9 @@
             <div class="info-row"><span class="lbl">Kode Booking</span><span class="val">{{ $booking->booking_code }}</span></div>
             <div class="info-row"><span class="lbl">Status</span><span class="val"><span class="badge badge-{{ $booking->status->value }}">{{ $booking->status->label() }}</span></span></div>
             <div class="info-row"><span class="lbl">Tanggal Dibuat</span><span class="val">{{ $booking->created_at->format('d M Y, H:i') }}</span></div>
-            <div class="info-row"><span class="lbl">Tanggal Sewa</span><span class="val">{{ $booking->start_date->format('d M Y') }}</span></div>
-            <div class="info-row"><span class="lbl">Tanggal Selesai</span><span class="val">{{ $booking->end_date->format('d M Y') }}</span></div>
+            <div class="info-row"><span class="lbl">Batas Waktu Pembayaran</span><span class="val" style="color:#d97706">{{ ($booking->payment_deadline ?? $booking->created_at->addHours(24))->format('d M Y, H:i') }}</span></div>
+            <div class="info-row"><span class="lbl">Tanggal Mulai Sewa</span><span class="val">{{ $booking->start_date->format('d M Y') }} · 17:00</span></div>
+            <div class="info-row"><span class="lbl" style="color:#e74c3c;font-weight:700">Deadline Pemakaian (Selesai)</span><span class="val" style="color:#e74c3c;font-weight:700">{{ $booking->end_date->format('d M Y') }} · 17:00</span></div>
             <div class="info-row"><span class="lbl">Metode Ambil</span><span class="val">{{ $booking->pickup_method->label() }}</span></div>
             @if($booking->delivery_address)
                 <div class="info-row"><span class="lbl">Alamat Antar</span><span class="val" style="text-align:right;max-width:60%">{{ $booking->delivery_address }}</span></div>

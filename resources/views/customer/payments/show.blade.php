@@ -1,23 +1,64 @@
 @extends('layouts.app')
 
-@section('title', 'Upload Bukti Pembayaran')
+@section('title', 'Menunggu Pembayaran - ' . $booking->booking_code)
 
 @push('styles')
 <style>
-.payment-layout { display:grid; grid-template-columns:1fr 340px; gap:28px; padding:40px 0; }
-.page-title { font-size:24px; font-weight:800; color:#1a1a2e; margin-bottom:24px; }
+.waiting-hero {
+    text-align: center;
+    padding: 40px 20px 20px;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+.waiting-illu {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    background: #fee2e2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 54px;
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.12);
+}
+.waiting-timer {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text-dark);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+.waiting-alert {
+    font-size: 15px;
+    font-weight: 800;
+    color: #e74c3c;
+    margin-bottom: 10px;
+}
+.waiting-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+.btn-chat-admin-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.btn-chat-admin-top:hover { background: var(--primary-dark); }
+
+.payment-layout { display:grid; grid-template-columns:1fr 340px; gap:28px; padding-bottom:50px; }
 .card { background:#fff; border:1px solid #e2e4e9; border-radius:14px; padding:28px; margin-bottom:24px; }
 .card-title { font-size:16px; font-weight:700; color:#1a1a2e; margin-bottom:20px; }
-
-/* Payment Steps */
-.steps { display:flex; align-items:center; gap:0; margin-bottom:32px; }
-.step { flex:1; text-align:center; padding:16px; background:#f8f9fb; border:1px solid #e2e4e9; position:relative; }
-.step:first-child { border-radius:10px 0 0 10px; }
-.step:last-child { border-radius:0 10px 10px 0; }
-.step.active { background:#4758D6; border-color:#4758D6; color:#fff; }
-.step .step-num { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; opacity:.6; }
-.step .step-label { font-size:13px; font-weight:700; }
-.step.active .step-num { opacity:.8; color:#fff; }
 
 /* Bank accounts */
 .banks-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
@@ -54,38 +95,27 @@
 .summary-row .val { color:#1a1a2e; font-weight:600; }
 .summary-total { display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:#1a1a2e; margin-top:12px; padding-top:12px; border-top:2px solid #e2e4e9; }
 
-/* Timer */
-.timer-box { background:linear-gradient(135deg,#1a1a2e,#16213e); color:#fff; border-radius:14px; padding:24px; text-align:center; margin-bottom:20px; }
-.timer-label { font-size:13px; color:rgba(255,255,255,.6); margin-bottom:8px; }
-.timer-value { font-size:36px; font-weight:800; color:#FFD700; letter-spacing:2px; }
-.timer-sub { font-size:12px; color:rgba(255,255,255,.5); margin-top:6px; }
-
 @media(max-width:992px) { .payment-layout { grid-template-columns:1fr; } }
 </style>
 @endpush
 
 @section('content')
 <div class="container">
+    <!-- Menunggu Pembayaran Hero (sesuai mockup) -->
+    <div class="waiting-hero">
+        <div class="waiting-illu">⏰</div>
+        <div class="waiting-timer" id="countdownHeader">24j : 00m : 00d</div>
+        <div class="waiting-alert">Selesaikan Pembayaranmu Sebelum Waktunya Habis!</div>
+        <p class="waiting-sub">
+            Tinggal selangkah lagi kamu bisa bawa motor keliling Jogja! Selesaikan transaksimu sekarang. Jika ada kendala, jangan ragu hubungi admin kami.
+        </p>
+        <a href="https://wa.me/6281234567890?text=Halo%20Admin%2C%20saya%20butuh%20bantuan%20terkait%20pembayaran%20booking%20{{ $booking->booking_code }}" target="_blank" class="btn-chat-admin-top">
+            Chat Admin
+        </a>
+    </div>
+
     <div class="payment-layout">
         <div>
-            <h1 class="page-title">Upload Bukti Pembayaran</h1>
-
-            <!-- Steps -->
-            <div class="steps">
-                <div class="step">
-                    <div class="step-num">Langkah 1</div>
-                    <div class="step-label">Detail Pesanan</div>
-                </div>
-                <div class="step active">
-                    <div class="step-num">Langkah 2</div>
-                    <div class="step-label">Pembayaran</div>
-                </div>
-                <div class="step">
-                    <div class="step-num">Langkah 3</div>
-                    <div class="step-label">Konfirmasi</div>
-                </div>
-            </div>
-
             @if($errors->any())
                 <div style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:14px;border-radius:10px;margin-bottom:20px;font-size:14px">
                     {{ $errors->first() }}
@@ -94,7 +124,7 @@
 
             <!-- Bank Accounts -->
             <div class="card">
-                <h3 class="card-title">Pilih Rekening Tujuan</h3>
+                <h3 class="card-title">Pilih Rekening Tujuan Transfer</h3>
                 <div class="banks-grid">
                     @php
                         $banks = [
@@ -109,7 +139,7 @@
                             <div class="bank-name">{{ $bank['name'] }}</div>
                             <div class="bank-number">
                                 {{ $bank['number'] }}
-                                <button class="copy-btn" onclick="event.stopPropagation(); copyText('{{ $bank['number'] }}', this)">Salin</button>
+                                <button type="button" class="copy-btn" onclick="event.stopPropagation(); copyText('{{ $bank['number'] }}', this)">Salin</button>
                             </div>
                             <div class="bank-holder">a/n {{ $bank['holder'] }}</div>
                         </div>
@@ -143,27 +173,20 @@
                         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('proof-input').click()">
                             <div style="font-size:36px;margin-bottom:8px">📸</div>
                             <strong>Klik untuk upload bukti</strong>
-                            <p>JPG, JPEG, atau PNG · Maks 2MB</p>
+                            <p>JPG, JPEG, PNG, atau WEBP · Maks 2MB</p>
                         </div>
-                        <input type="file" id="proof-input" name="payment_proof" accept="image/jpg,image/jpeg,image/png" style="display:none" required>
+                        <input type="file" id="proof-input" name="payment_proof" accept="image/jpg,image/jpeg,image/png,image/webp" style="display:none" required>
                         <img id="proof-preview" class="preview-img">
                         @error('payment_proof') <span class="invalid-feedback" style="display:block;margin-top:8px">{{ $message }}</span> @enderror
                     </div>
 
-                    <button type="submit" class="btn-submit-pay">Upload & Kirim Bukti →</button>
+                    <button type="submit" class="btn-submit-pay">Kirim Bukti Pembayaran →</button>
                 </form>
             </div>
         </div>
 
         <!-- Sidebar -->
         <div>
-            <!-- Timer -->
-            <div class="timer-box">
-                <div class="timer-label">⏱ Batas waktu pembayaran</div>
-                <div class="timer-value" id="countdown">24:00:00</div>
-                <div class="timer-sub">Bayar sebelum waktu habis</div>
-            </div>
-
             <!-- Booking Summary -->
             <div class="sidebar-card">
                 <div class="sidebar-header">Ringkasan Pesanan</div>
@@ -176,8 +199,8 @@
                         <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f0f0f5">
                             <img src="{{ $item->motor->image_url }}" alt="{{ $item->motor->model }}" style="width:60px;height:44px;object-fit:cover;border-radius:8px">
                             <div>
-                                <div style="font-size:14px;font-weight:700;color:#1a1a2e">{{ $item->motor->model }}</div>
-                                <div style="font-size:12px;color:#8a8a9a">{{ $item->total_days }} hari</div>
+                                <div style="font-size:14px;font-weight:700;color:#1a1a2e">{{ $item->motor->merk }} {{ $item->motor->model }}</div>
+                                <div style="font-size:12px;color:#8a8a9a">{{ $item->total_days }} hari (Selesai: {{ $item->due_date ? $item->due_date->format('d M Y') : $booking->end_date->format('d M Y') }})</div>
                             </div>
                         </div>
                     @endforeach
@@ -197,22 +220,26 @@
 
 @push('scripts')
 <script>
-// Countdown timer (24 hours from booking creation)
-const createdAt = new Date('{{ $booking->created_at->toIso8601String() }}');
-const expiry = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+// Countdown timer (waktu pembayaran seperti pada gambar)
+@php
+    $deadline = $booking->payment_deadline ?? $booking->created_at->addHours(24);
+@endphp
+const expiry = new Date('{{ $deadline->toIso8601String() }}');
 
 function updateTimer() {
     const now = new Date();
     const diff = expiry - now;
     if (diff <= 0) {
-        document.getElementById('countdown').textContent = 'KADALUARSA';
-        document.getElementById('countdown').style.color = '#ff6b6b';
+        document.getElementById('countdownHeader').textContent = '00j : 00m : 00d';
+        document.getElementById('countdownHeader').style.color = '#e74c3c';
+        // Auto redirect to expired page
+        window.location.href = "{{ route('customer.payments.expired', $booking) }}";
         return;
     }
     const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
     const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
     const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-    document.getElementById('countdown').textContent = `${h}:${m}:${s}`;
+    document.getElementById('countdownHeader').textContent = `${h}j : ${m}m : ${s}d`;
 }
 setInterval(updateTimer, 1000);
 updateTimer();
@@ -222,6 +249,7 @@ function selectBank(el, name) {
     document.querySelectorAll('.bank-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     document.getElementById('payment_method_select').value = name;
+    document.getElementById('payment_method_input').value = name;
 }
 
 // Copy to clipboard

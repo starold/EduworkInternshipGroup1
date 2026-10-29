@@ -20,6 +20,9 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'ktp_number',
+        'sim_number',
+        'avatar',
         'role',
     ];
 
@@ -55,5 +58,10 @@ class User extends Authenticatable
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
 }

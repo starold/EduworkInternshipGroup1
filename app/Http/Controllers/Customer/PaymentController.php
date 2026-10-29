@@ -13,11 +13,15 @@ use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    public function show(Booking $booking): View
+    public function show(Booking $booking): View|RedirectResponse
     {
         abort_if($booking->user_id !== Auth::id(), 403);
 
         $booking->load(['items.motor', 'payment']);
+
+        if ($booking->isPaymentExpired() && (!$booking->payment || !$booking->payment->isPaid())) {
+            return redirect()->route('customer.payments.expired', $booking);
+        }
 
         return view('customer.payments.show', compact('booking'));
     }
@@ -27,7 +31,7 @@ class PaymentController extends Controller
         abort_if($booking->user_id !== Auth::id(), 403);
 
         $request->validate([
-            'payment_proof' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'payment_proof' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'payment_method' => ['required', 'string', 'max:50'],
         ]);
 
@@ -42,7 +46,25 @@ class PaymentController extends Controller
             ]
         );
 
-        return redirect()->route('customer.bookings.show', $booking)
-            ->with('success', 'Bukti pembayaran berhasil diupload. Menunggu konfirmasi admin.');
+        return redirect()->route('customer.payments.success', $booking)
+            ->with('success', 'Bukti pembayaran berhasil diupload.');
+    }
+
+    public function success(Booking $booking): View
+    {
+        abort_if($booking->user_id !== Auth::id(), 403);
+
+        $booking->load(['items.motor', 'payment']);
+
+        return view('customer.payments.success', compact('booking'));
+    }
+
+    public function expired(Booking $booking): View
+    {
+        abort_if($booking->user_id !== Auth::id(), 403);
+
+        $booking->load(['items.motor']);
+
+        return view('customer.payments.expired', compact('booking'));
     }
 }

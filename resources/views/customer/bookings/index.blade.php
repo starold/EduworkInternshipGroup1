@@ -151,11 +151,24 @@ tr:hover td { background:#fafbfd; }
                                     <div class="tbl-price">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</div>
                                 </td>
                                 <td>
-                                    @if($booking->status->value === 'pending' && (!$booking->payment || !$booking->payment->isPaid()))
-                                        <a href="{{ route('customer.payments.show', $booking) }}" class="btn-update">Update</a>
-                                    @else
-                                        <a href="{{ route('customer.bookings.show', $booking) }}" class="btn-detail">Detail</a>
-                                    @endif
+                                    <button type="button" class="btn-detail" 
+                                        onclick="showBookingDetail({
+                                            motorImage: '{{ $motor ? $motor->image_url : '' }}',
+                                            motorModel: '{{ $motor ? $motor->model : 'Motor' }}',
+                                            motorCategory: '{{ $motor && $motor->category ? $motor->category->name : '' }}',
+                                            userName: '{{ auth()->user()->name }}',
+                                            userPhone: '{{ auth()->user()->phone ?? '-' }}',
+                                            bookingCode: '{{ $booking->booking_code }}',
+                                            bookingDate: '{{ $booking->created_at->format('d M Y') }}',
+                                            startDate: '{{ $booking->start_date->format('D, d M Y') }} · 17:00',
+                                            endDate: '{{ $booking->end_date->format('D, d M Y') }} · 17:00',
+                                            statusLabel: '{{ $st['label'] }}',
+                                            statusClass: '{{ $st['class'] }}',
+                                            paymentUrl: '{{ route('customer.payments.show', $booking) }}',
+                                            isPending: {{ $booking->status->value === 'pending' ? 'true' : 'false' }}
+                                        })">
+                                        Detail
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -222,4 +235,96 @@ tr:hover td { background:#fafbfd; }
         </div>
     </div>
 </div>
+
+<!-- Modal Detail Pemesanan (Customer) -->
+<div class="modal-overlay" id="bookingDetailModal" onclick="if(event.target===this)closeBookingDetailModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3200;align-items:center;justify-content:center;padding:20px">
+    <div class="modal-box" style="background:#fff;border-radius:12px;width:100%;max-width:520px;box-shadow:0 10px 30px rgba(0,0,0,.15);overflow:hidden">
+        <div style="padding:20px 24px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f5">
+            <h3 style="font-size:17px;font-weight:800;color:#0d0d0d">Detail Pemesanan</h3>
+            <button type="button" onclick="closeBookingDetailModal()" style="background:none;border:none;font-size:22px;color:#9a9aaa;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div style="padding:24px">
+            <!-- Motor & Pemesan Section -->
+            <div style="display:grid;grid-template-columns:140px 1fr;gap:20px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #f0f0f5">
+                <div>
+                    <div style="width:140px;height:100px;background:#f7f8fa;border-radius:8px;padding:6px;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+                        <img id="mDetailMotorImg" src="" alt="Motor" style="max-width:100%;max-height:100%;object-fit:contain">
+                    </div>
+                    <div id="mDetailMotorModel" style="font-size:15px;font-weight:800;color:#0d0d0d">Genio</div>
+                    <div id="mDetailMotorCat" style="font-size:12px;color:#9a9aaa">Matic</div>
+                </div>
+                <div style="font-size:13px">
+                    <div style="font-weight:700;color:#0d0d0d;margin-bottom:8px">Pemesan</div>
+                    <div style="display:grid;grid-template-columns:100px 1fr;gap:6px 8px;color:#4a4a5a">
+                        <span style="color:#9a9aaa">Nama</span>
+                        <span id="mDetailUserName" style="font-weight:600;color:#0d0d0d">: -</span>
+                        <span style="color:#9a9aaa">No. whatsapp</span>
+                        <span id="mDetailUserPhone" style="font-weight:600;color:#0d0d0d">: -</span>
+                        <span style="color:#9a9aaa">Kode booking</span>
+                        <span id="mDetailBookingCode" style="font-weight:700;color:#1847ED">: -</span>
+                        <span style="color:#9a9aaa">Tanggal booking</span>
+                        <span id="mDetailBookingDate" style="font-weight:600;color:#0d0d0d">: -</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tanggal Sewa & Deadline Pemakaian -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#f8f9fb;padding:14px;border-radius:8px;margin-bottom:20px">
+                <div>
+                    <div style="font-size:11px;color:#9a9aaa;font-weight:600;text-transform:uppercase;margin-bottom:4px">Tanggal Sewa</div>
+                    <div id="mDetailStartDate" style="font-size:13px;font-weight:700;color:#0d0d0d">-</div>
+                </div>
+                <div>
+                    <div style="font-size:11px;color:#dc2626;font-weight:700;text-transform:uppercase;margin-bottom:4px">Deadline Pemakaian (Selesai)</div>
+                    <div id="mDetailEndDate" style="font-size:13px;font-weight:700;color:#0d0d0d">-</div>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                    <span style="font-size:12px;color:#9a9aaa;margin-right:8px">Status:</span>
+                    <span id="mDetailStatus" class="badge badge-pending">Pending</span>
+                </div>
+                <div id="mDetailActionWrap">
+                    <a id="mDetailPayBtn" href="#" class="btn-detail" style="display:none;background:#1847ED">Bayar Sekarang</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function showBookingDetail(data) {
+    document.getElementById('mDetailMotorImg').src = data.motorImage || '';
+    document.getElementById('mDetailMotorModel').textContent = data.motorModel || 'Motor';
+    document.getElementById('mDetailMotorCat').textContent = data.motorCategory || '';
+    document.getElementById('mDetailUserName').textContent = ': ' + data.userName;
+    document.getElementById('mDetailUserPhone').textContent = ': ' + data.userPhone;
+    document.getElementById('mDetailBookingCode').textContent = ': ' + data.bookingCode;
+    document.getElementById('mDetailBookingDate').textContent = ': ' + data.bookingDate;
+    document.getElementById('mDetailStartDate').textContent = data.startDate;
+    document.getElementById('mDetailEndDate').textContent = data.endDate;
+    
+    const statusEl = document.getElementById('mDetailStatus');
+    statusEl.textContent = data.statusLabel;
+    statusEl.className = 'badge ' + data.statusClass;
+
+    const payBtn = document.getElementById('mDetailPayBtn');
+    if (data.isPending) {
+        payBtn.href = data.paymentUrl;
+        payBtn.style.display = 'inline-flex';
+    } else {
+        payBtn.style.display = 'none';
+    }
+
+    const modal = document.getElementById('bookingDetailModal');
+    modal.style.display = 'flex';
+}
+
+function closeBookingDetailModal() {
+    document.getElementById('bookingDetailModal').style.display = 'none';
+}
+</script>
+@endpush
 @endsection

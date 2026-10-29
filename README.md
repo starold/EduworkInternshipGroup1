@@ -20,16 +20,19 @@
 ## 🌟 Fitur Utama
 
 ### 👤 Sisi Penyewa (Customer)
-- **Katalog & Filter Kendaraan**: Eksplorasi motor berdasarkan kategori (Matic, Manual, Sport, Trail), harga harian, dan ketersediaan unit.
+- **Dialog Profil Pengguna**: Modal edit data diri (Nama Lengkap, No WhatsApp, No. KTP, No. SIM, dan Avatar/Foto Profil) dapat diakses dari navbar di seluruh halaman (Home, Deskripsi Kendaraan, Daftar Pesanan).
+- **Katalog & Deskripsi Kendaraan**: Tampilan detail spesifikasi motor, perlengkapan sewa (Helm SNI, Bensin, STNK, Sarung Tangan), modal interaktif **"Pilih Durasi Sewa"** (1-5 hari) dengan kalkulasi otomatis tanggal selesai, serta daftar rekomendasi kendaraan lainnya.
 - **Pemesanan Fleksibel (Booking)**: Menentukan tanggal mulai & tanggal selesai sewa, metode pengambilan (Ambil di Rental / Diantar ke Lokasi), serta kalkulasi biaya harian dan deposit jaminan secara otomatis.
-- **Sistem Pembayaran**: Informasi rekening transfer dan form unggah (*upload*) bukti transfer pembayaran.
+- **Waktu Pembayaran & Deadline Interaktif**: Countdown timer real-time `HHj : MMm : SSd` batas waktu pembayaran pada halaman pembayaran dan detail pesanan, lengkap dengan halaman status **Pembayaran Berhasil** dan **Pembayaran Gagal (Waktu Habis)**.
+- **Deadline Pemakaian Motor**: Informasi batas waktu penggunaan motor (tanggal dan jam selesai sewa) ditampilkan jelas pada popup Detail Pemesanan dan halaman detail pesanan.
 - **Daftar Pesanan & Status Tracking**: Memantau status pesanan sewa secara berkala (*Menunggu Pembayaran*, *Menunggu Konfirmasi*, *Dikonfirmasi*, *Sedang Berjalan*, *Selesai*, *Dibatalkan*).
 - **Autentikasi Aman**: Login, Registrasi, dan manajemen sesi pengguna.
 
 ### 🛡️ Sisi Pengelola (Admin Panel)
+- **Dialog Profil Admin**: Modal edit data profil yang dapat diakses langsung dari topbar seluruh halaman admin.
 - **Dashboard Ringkasan Operasional**: Statistik total unit motor, pesanan yang butuh konfirmasi, dan sewa aktif.
-- **Manajemen Armada Motor (CRUD)**: Menambah unit motor baru, memperbarui spesifikasi/harga harian, mengatur status ketersediaan (*Tersedia*, *Disewa*, *Servis/Perawatan*), dan menghapus unit.
-- **Verifikasi Pesanan & Pembayaran**: Memvalidasi bukti transfer yang diunggah pelanggan, lalu mengonfirmasi (*Approve*) atau menolak (*Reject*) pesanan.
+- **Manajemen Armada Motor (Modal CRUD)**: Menambah atau mengedit unit motor melalui modal interaktif **"Detail Kendaraan"** (upload foto, deskripsi, merk, model, plat nomor, harga harian, kapasitas tangki, status) serta menghapus unit.
+- **Update Pesanan Cepat (Modal)**: Memperbarui status pesanan sewa melalui modal **"Update Pemesanan"** yang menampilkan info pemesan, tanggal mulai sewa, dan **deadline pemakaian motor**.
 
 ---
 

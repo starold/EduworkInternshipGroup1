@@ -27,6 +27,7 @@ class Booking extends Model
         'total_price',
         'status',
         'notes',
+        'payment_deadline',
     ];
 
     protected function casts(): array
@@ -40,6 +41,7 @@ class Booking extends Model
             'total_price' => 'decimal:2',
             'pickup_method' => PickupMethod::class,
             'status' => BookingStatus::class,
+            'payment_deadline' => 'datetime',
         ];
     }
 
@@ -47,6 +49,7 @@ class Booking extends Model
     {
         static::creating(function (Booking $booking) {
             $booking->booking_code = 'BK-' . strtoupper(uniqid());
+            $booking->payment_deadline = now()->addHours(24);
         });
     }
 
@@ -78,5 +81,10 @@ class Booking extends Model
     public function getFormattedTotalAttribute(): string
     {
         return 'Rp' . number_format($this->total_price, 0, ',', '.');
+    }
+
+    public function isPaymentExpired(): bool
+    {
+        return $this->payment_deadline && now()->isAfter($this->payment_deadline);
     }
 }

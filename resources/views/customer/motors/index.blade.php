@@ -118,28 +118,26 @@
             <div class="motors-grid">
                 @foreach($motors as $motor)
                     <div class="motor-card">
-                        <div class="motor-card-img">
-                            <img src="{{ $motor->image_url }}" alt="{{ $motor->model }}">
-                        </div>
-                        <div class="motor-card-body">
-                            <div class="motor-card-name">{{ $motor->model }}</div>
-                            <div class="motor-card-type">{{ $motor->category->name }}</div>
-                            <div class="motor-card-meta">
-                                <span class="motor-plate">🏍 {{ $motor->plate_number }}</span>
-                                <span class="motor-status">Tersedia</span>
+                        <a href="{{ route('motors.show', $motor) }}" style="text-decoration:none;color:inherit">
+                            <div class="motor-card-img">
+                                <img src="{{ $motor->image_url }}" alt="{{ $motor->model }}">
                             </div>
-                            <div class="motor-card-footer">
-                                <div class="motor-price">
-                                    Rp{{ number_format($motor->price_per_day, 0, ',', '.') }}
-                                    <span class="motor-price-sub">/ hari</span>
+                            <div class="motor-card-body">
+                                <div class="motor-card-name">{{ $motor->merk }} {{ $motor->model }}</div>
+                                <div class="motor-card-type">{{ $motor->category->name }}</div>
+                                <div class="motor-card-meta">
+                                    <span class="motor-plate">🏍 {{ $motor->plate_number }}</span>
+                                    <span class="motor-status">Tersedia</span>
                                 </div>
-                                @auth
-                                    <a href="{{ route('customer.bookings.create', $motor) }}" class="btn-book">Booking</a>
-                                @else
-                                    <a href="{{ route('login') }}" class="btn-book">Booking</a>
-                                @endauth
+                                <div class="motor-card-footer">
+                                    <div class="motor-price">
+                                        Rp{{ number_format($motor->price_per_day, 0, ',', '.') }}
+                                        <span class="motor-price-sub">/ hari</span>
+                                    </div>
+                                    <span class="btn-book">Booking</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 @endforeach
             </div>

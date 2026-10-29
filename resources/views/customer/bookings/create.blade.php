@@ -71,7 +71,12 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tanggal Selesai</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date', today()->addDay()->format('Y-m-d')) }}" min="{{ today()->addDay()->format('Y-m-d') }}" required>
+                            @php
+                                $defaultDays = (int) request('days', 1);
+                                if ($defaultDays < 1) $defaultDays = 1;
+                                $defaultEndDate = today()->addDays($defaultDays)->format('Y-m-d');
+                            @endphp
+                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date', $defaultEndDate) }}" min="{{ today()->addDay()->format('Y-m-d') }}" required>
                             @error('end_date') <span class="invalid-feedback">{{ $message }}</span> @enderror
                         </div>
                     </div>

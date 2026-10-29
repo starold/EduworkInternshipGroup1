@@ -49,6 +49,23 @@
         .alert { padding:14px 18px; border-radius:var(--radius); margin-bottom:20px; font-size:14px; font-weight:500; }
         .alert-success { background:#d4edda; color:#155724; }
         .alert-danger { background:#f8d7da; color:#721c24; }
+
+        /* Profile Modal */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:3000; display:none; align-items:flex-start; justify-content:center; padding-top:100px; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:12px; width:100%; max-width:440px; box-shadow:0 8px 30px rgba(0,0,0,.15); overflow:hidden; }
+        .modal-header { padding:20px 24px 0; display:flex; align-items:center; justify-content:space-between; }
+        .modal-title { font-size:18px; font-weight:700; color:#1a1a2e; }
+        .modal-close { background:none; border:none; font-size:22px; cursor:pointer; color:#8a8a9a; line-height:1; }
+        .modal-body { padding:20px 24px 24px; }
+        .modal-avatar { width:64px; height:64px; border-radius:50%; background:#4758D6; color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+        .modal-edit-btn { font-size:13px; color:#4758D6; font-weight:600; background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:4px; }
+        .mform-group { margin-bottom:14px; }
+        .mform-label { display:block; font-size:12px; font-weight:600; color:#8a8a9a; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+        .mform-control { width:100%; padding:10px 14px; border:1.5px solid #e2e4e9; border-radius:8px; font-size:14px; color:#1a1a2e; outline:none; }
+        .mform-control:focus { border-color:#4758D6; }
+        .btn-save { width:100%; padding:12px; background:#4758D6; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; margin-top:8px; }
+        .btn-save:hover { background:#3847B5; }
     </style>
     @stack('styles')
 </head>
@@ -91,7 +108,14 @@
     <header class="topbar">
         <h2>@yield('page-title', 'Dashboard')</h2>
         <div class="topbar-right">
-            <div class="topbar-badge">👤 {{ auth()->user()->name }}</div>
+            <button type="button" onclick="openProfileModal()" class="topbar-badge" style="background:#f0f2ff;border:1px solid #e2e4e9;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#4758D6;display:flex;align-items:center;gap:8px">
+                @if(auth()->user()->avatar)
+                    <img src="{{ auth()->user()->avatar_url }}" alt="" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
+                @else
+                    <span>👤</span>
+                @endif
+                {{ auth()->user()->name }}
+            </button>
         </div>
     </header>
 
@@ -106,6 +130,69 @@
         @yield('content')
     </div>
 </div>
+
+<!-- Profile Modal -->
+@auth
+<div class="modal-overlay" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">Profil Admin</span>
+            <button class="modal-close" onclick="closeProfileModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="{{ route('profile.update') }}" id="profileFormAdmin" enctype="multipart/form-data">
+                @csrf @method('PUT')
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+                    <div class="modal-avatar" style="overflow:hidden;flex-shrink:0">
+                        @if(auth()->user()->avatar)
+                            <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" id="adminAvatarImg" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                        @else
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80" alt="Avatar" id="adminAvatarImg" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                        @endif
+                    </div>
+                    <input type="file" name="avatar" id="adminAvatarInput" accept="image/*" style="display:none" onchange="previewAdminAvatar(this)">
+                    <button type="button" class="modal-edit-btn" onclick="document.getElementById('adminAvatarInput').click()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Edit gambar
+                    </button>
+                </div>
+                <div class="mform-group">
+                    <label class="mform-label">Nama Lengkap</label>
+                    <input type="text" name="name" class="mform-control" placeholder="Nama Lengkap" value="{{ old('name', auth()->user()->name) }}" required>
+                </div>
+                <div class="mform-group">
+                    <label class="mform-label">No WhatsApp</label>
+                    <input type="text" name="phone" class="mform-control" placeholder="12345678910" value="{{ old('phone', auth()->user()->phone) }}">
+                </div>
+                <div class="mform-group">
+                    <label class="mform-label">No. KTP</label>
+                    <input type="text" name="ktp_number" class="mform-control" placeholder="12345678910" value="{{ old('ktp_number', auth()->user()->ktp_number) }}">
+                </div>
+                <div class="mform-group">
+                    <label class="mform-label">No. SIM</label>
+                    <input type="text" name="sim_number" class="mform-control" placeholder="12345678910" value="{{ old('sim_number', auth()->user()->sim_number) }}">
+                </div>
+                <button type="submit" class="btn-save">Simpan</button>
+            </form>
+        </div>
+    </div>
+</div>
+@endauth
+
+<script>
+function openProfileModal() { document.getElementById('profileModal').classList.add('open'); }
+function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
+function previewAdminAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('adminAvatarImg');
+            if (img) img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 
 @stack('scripts')
 </body>

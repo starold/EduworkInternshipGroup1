@@ -6,7 +6,9 @@ use App\Enums\MotorStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Motor;
 use App\Models\MotorCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -73,6 +75,31 @@ class HomeController extends Controller
 
         $averageRating = $reviews->avg('rating');
 
-        return view('customer.motors.show', compact('motor', 'reviews', 'averageRating'));
+        $recommendations = Motor::with('category')
+            ->where('id', '!=', $motor->id)
+            ->where('status', MotorStatus::Available)
+            ->take(8)
+            ->get();
+
+        return view('customer.motors.show', compact('motor', 'reviews', 'averageRating', 'recommendations'));
+    }
+
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'ktp_number' => ['nullable', 'string', 'max:20'],
+            'sim_number' => ['nullable', 'string', 'max:20'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        Auth::user()->update($validated);
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
     }
 }
