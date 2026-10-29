@@ -152,97 +152,85 @@
         @media(max-width:480px) {
             .footer-grid { grid-template-columns:1fr; }
         }
+        /* Unified Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+        .badge::before {
+            content: '●';
+            font-size: 8px;
+        }
+        /* Menunggu / Pending -> Kuning */
+        .badge-pending, .badge-warning, .badge-not_returned {
+            background: #fef9c3 !important;
+            color: #854d0e !important;
+        }
+        /* Sedang disewa -> Biru */
+        .badge-confirmed, .badge-rented, .badge-info, .badge-blue {
+            background: #dbeafe !important;
+            color: #1e40af !important;
+        }
+        /* Sudah kembali / Selesai rental / Completed / Paid -> Hijau */
+        .badge-returned, .badge-completed, .badge-paid, .badge-success {
+            background: #dcfce7 !important;
+            color: #166534 !important;
+        }
+        /* Ditolak / Cancelled / Failed / Unpaid -> Merah / Abu-abu */
+        .badge-rejected, .badge-unpaid, .badge-failed, .badge-danger, .badge-damage {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+        .badge-cancelled, .badge-secondary, .badge-other {
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+        }
+        .badge-late {
+            background: #fef9c3 !important;
+            color: #854d0e !important;
+        }
+
+        /* Table Scroll Containers */
+        .table-scroll-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            background: #fff;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .table-scroll-body {
+            max-height: 560px;
+            overflow-y: auto;
+            width: 100%;
+        }
+        .table-scroll-body table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+        .table-scroll-body thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f8f9fb;
+            box-shadow: 0 1px 0 var(--border);
+        }
     </style>
     @stack('styles')
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar">
-    <div class="container">
-        <a href="{{ route('home') }}" class="nav-brand">ED<span>.</span>RENT</a>
-
-        <ul class="nav-links">
-            <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
-            <li><a href="{{ route('vehicles.index') }}" class="{{ request()->routeIs('vehicles.*') ? 'active' : '' }}">Pilih Kendaraan</a></li>
-            @auth
-            <li><a href="{{ route('customer.bookings.index') }}" class="{{ request()->routeIs('customer.bookings.*') ? 'active' : '' }}">Daftar Pesanan</a></li>
-            @endauth
-        </ul>
-
-        <div class="nav-actions">
-            <a href="https://wa.me/6281234567890" target="_blank" class="btn-wa-help">
-                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Butuh bantuan?
-            </a>
-
-            @auth
-                <div class="nav-profile">
-                    <button class="profile-trigger" id="profileBtn" onclick="toggleProfile()">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </button>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="profile-dropdown-header">
-                            <div class="pname">{{ auth()->user()->name }}</div>
-                            <div class="pemail">{{ auth()->user()->email }}</div>
-                        </div>
-                        <a class="dropdown-item" href="#" onclick="openProfileModal(); closeProfileDropdown()">
-                            <span class="di-icon">👤</span> Profil saya
-                        </a>
-                        <a class="dropdown-item" href="{{ route('admin.dashboard') }}" @if(!auth()->user()->isAdmin() && !auth()->user()->isOwner()) style="display:none" @endif>
-                            <span class="di-icon">📊</span> Dashboard
-                        </a>
-                        <a class="dropdown-item" href="{{ route('customer.bookings.index') }}">
-                            <span class="di-icon">📋</span> Daftar Pesanan
-                        </a>
-                        <a class="dropdown-item" href="{{ route('home') }}">
-                            <span class="di-icon">🏍</span> Kendaraan
-                        </a>
-                        <hr class="dropdown-divider">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="dropdown-item" style="width:100%;border:none;background:none;text-align:left;cursor:pointer;color:#dc2626">
-                                <span class="di-icon">🚪</span> Keluar
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @else
-                <a href="{{ route('login') }}" class="btn-login">Masuk</a>
-            @endauth
-        </div>
-
-        <!-- Hamburger -->
-        <button class="nav-hamburger" onclick="openMobileMenu()">
-            <span></span><span></span><span></span>
-        </button>
-    </div>
-</nav>
-
-<!-- Mobile Menu -->
-<div class="mobile-menu" id="mobileMenu" onclick="closeMobileMenu()">
-    <div class="mobile-menu-panel" onclick="event.stopPropagation()">
-        <button class="mobile-menu-close" onclick="closeMobileMenu()">×</button>
-        <div style="font-size:20px;font-weight:800;color:#0d0d0d">ED<span style="color:#1847ED">.</span>RENT</div>
-        <div class="mobile-menu-links">
-            <a href="{{ route('home') }}">Home</a>
-            <a href="{{ route('home') }}">Pilih Kendaraan</a>
-            @auth
-            <a href="{{ route('customer.bookings.index') }}">Daftar Pesanan</a>
-            <a href="#" onclick="openProfileModal(); closeMobileMenu()">Profil Saya</a>
-            <form method="POST" action="{{ route('logout') }}" style="margin-top:8px">
-                @csrf
-                <button type="submit" style="width:100%;padding:12px 8px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;text-align:left">
-                    Keluar
-                </button>
-            </form>
-            @else
-            <a href="{{ route('login') }}" style="background:#1847ED;color:#fff;padding:12px 16px;border-radius:8px;font-weight:700;text-align:center">Masuk</a>
-            <a href="{{ route('register') }}">Daftar</a>
-            @endauth
-        </div>
-    </div>
-</div>
+@include('partials.navbar')
 
 <!-- Profile Modal -->
 @auth

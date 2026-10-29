@@ -57,12 +57,12 @@ class Motor extends Model
         }
 
         return $this->image
-            ? asset('storage/' . $this->image)
+            ? asset('storage/'.$this->image)
             : asset('images/motor-placeholder.jpg');
     }
 
     public function getFormattedPriceAttribute(): string
     {
-        return 'Rp' . number_format($this->price_per_day, 0, ',', '.');
+        return 'Rp'.number_format($this->price_per_day, 0, ',', '.');
     }
 }

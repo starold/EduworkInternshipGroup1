@@ -3,48 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') - ED.RENT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4758D6; --primary-dark: #3847B5;
-            --sidebar-bg: #1a1a2e; --sidebar-width: 250px;
-            --text-dark: #1a1a2e; --text-body: #4a4a5a; --text-muted: #8a8a9a;
-            --border: #e2e4e9; --bg-light: #f8f9fb; --bg-white: #ffffff;
-            --success: #25D366; --danger: #e74c3c; --warning: #f59e0b;
-            --radius: 10px; --shadow: 0 2px 8px rgba(0,0,0,.08);
-            --transition: all .2s;
+            --primary: #1847ED;
+            --primary-dark: #1339c4;
+            --primary-light: #e8eeff;
+            --text-dark: #0d0d0d;
+            --text-body: #4a4a5a;
+            --text-muted: #9a9aaa;
+            --bg-white: #ffffff;
+            --bg-light: #f7f8fa;
+            --border: #e8e8f0;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --warning: #ca8a04;
+            --warning-bg: #fef9c3;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --info: #1d4ed8;
+            --info-bg: #dbeafe;
+            --radius: 8px;
+            --radius-lg: 12px;
+            --shadow: 0 1px 6px rgba(0,0,0,.08);
+            --shadow-md: 0 4px 20px rgba(0,0,0,.1);
+            --transition: all .2s cubic-bezier(.4,0,.2,1);
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; color:var(--text-body); background:var(--bg-light); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'Inter',sans-serif; color:var(--text-body); background:var(--bg-light); min-height:100vh; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
         a { text-decoration:none; color:inherit; }
+        img { max-width:100%; display:block; }
+        ul { list-style:none; }
+        button, input, select, textarea { font:inherit; font-family:'Inter',sans-serif; max-width:100%; min-width:0; }
+        textarea { resize:vertical; }
 
-        /* Sidebar */
-        .sidebar { width:var(--sidebar-width); background:var(--sidebar-bg); min-height:100vh; position:fixed; left:0; top:0; bottom:0; display:flex; flex-direction:column; z-index:200; }
-        .sidebar-brand { padding:24px 20px; border-bottom:1px solid rgba(255,255,255,.08); }
-        .sidebar-brand h1 { font-size:22px; font-weight:800; color:#fff; }
-        .sidebar-brand h1 span { color:var(--primary); }
-        .sidebar-brand p { font-size:12px; color:rgba(255,255,255,.4); margin-top:2px; }
-        .sidebar-nav { flex:1; padding:20px 0; overflow-y:auto; }
-        .nav-section-label { font-size:10px; font-weight:700; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1px; padding:0 20px 8px; }
-        .nav-item { display:flex; align-items:center; gap:12px; padding:11px 20px; color:rgba(255,255,255,.6); font-size:14px; font-weight:500; transition:var(--transition); cursor:pointer; }
-        .nav-item:hover { color:#fff; background:rgba(255,255,255,.06); }
-        .nav-item.active { color:#fff; background:var(--primary); }
-        .nav-item .icon { font-size:18px; width:20px; text-align:center; }
-        .sidebar-user { padding:16px 20px; border-top:1px solid rgba(255,255,255,.08); }
-        .sidebar-user .uname { font-size:14px; font-weight:600; color:#fff; margin-bottom:4px; }
-        .sidebar-user .urole { font-size:12px; color:rgba(255,255,255,.4); }
-        .btn-logout { width:100%; margin-top:12px; padding:9px; background:rgba(255,255,255,.06); color:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.1); border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:var(--transition); }
-        .btn-logout:hover { background:var(--danger); color:#fff; border-color:transparent; }
+        .container { max-width:1160px; margin:0 auto; padding:0 24px; width:100%; }
 
-        /* Main */
-        .main { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; }
-        .topbar { background:var(--bg-white); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
-        .topbar h2 { font-size:18px; font-weight:700; color:var(--text-dark); }
-        .topbar-right { display:flex; align-items:center; gap:16px; }
-        .topbar-badge { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text-body); }
-        .content { padding:32px; flex:1; }
-
+        /* ---- NAVBAR ---- */
+        .navbar {
+            background:#fff;
+            border-bottom:1px solid var(--border);
+            position:sticky; top:0; z-index:1000;
+            height:60px;
+        }
+        .navbar .container { height:100%; display:flex; align-items:center; justify-content:space-between; }
+        .nav-brand { font-size:20px; font-weight:800; color:var(--text-dark); letter-spacing:-.3px; }
+        .nav-brand span { color:var(--primary); }
         /* Cards, Tables, Alerts */
         .alert { padding:14px 18px; border-radius:var(--radius); margin-bottom:20px; font-size:14px; font-weight:500; }
         .alert-success { background:#d4edda; color:#155724; }
@@ -66,134 +74,281 @@
         .mform-control:focus { border-color:#4758D6; }
         .btn-save { width:100%; padding:12px; background:#4758D6; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; margin-top:8px; }
         .btn-save:hover { background:#3847B5; }
+        .nav-links { display:flex; align-items:center; gap:32px; }
+        .nav-links a { font-size:14px; font-weight:500; color:var(--text-body); transition:var(--transition); }
+        .nav-links a:hover, .nav-links a.active { color:var(--primary); font-weight:600; }
+
+        .nav-actions { display:flex; align-items:center; gap:12px; }
+        .btn-wa-help {
+            display:flex; align-items:center; gap:6px;
+            font-size:13px; font-weight:500; color:var(--text-body);
+            padding:7px 12px; border-radius:var(--radius); border:1px solid var(--border);
+            transition:var(--transition); background:#fff;
+        }
+        .btn-wa-help:hover { border-color:var(--primary); color:var(--primary); }
+        .btn-wa-help svg { width:16px; height:16px; fill:#16a34a; }
+        .btn-login { padding:8px 20px; background:var(--primary); color:#fff; font-size:13px; font-weight:700; border-radius:var(--radius); border:none; cursor:pointer; }
+        .btn-login:hover { background:var(--primary-dark); }
+
+        /* Profile dropdown */
+        .nav-profile { position:relative; }
+        .profile-trigger {
+            width:36px; height:36px; border-radius:50%; background:var(--primary);
+            color:#fff; font-size:14px; font-weight:700; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 2px 8px rgba(24,71,237,.25);
+        }
+        .profile-dropdown {
+            position:absolute; top:calc(100% + 10px); right:0;
+            width:220px; background:#fff; border:1px solid var(--border);
+            border-radius:var(--radius-lg); box-shadow:var(--shadow-md);
+            padding:8px 0; display:none; z-index:100;
+        }
+        .profile-dropdown.open { display:block; }
+        .profile-dropdown-header { padding:12px 16px 8px; border-bottom:1px solid var(--border); margin-bottom:6px; }
+        .profile-dropdown-header .pname { font-size:14px; font-weight:700; color:var(--text-dark); }
+        .profile-dropdown-header .pemail { font-size:12px; color:var(--text-muted); }
+        .dropdown-item { display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:13px; font-weight:500; color:var(--text-body); cursor:pointer; transition:var(--transition); }
+        .dropdown-item:hover { background:var(--bg-light); color:var(--primary); }
+        .dropdown-item .di-icon { font-size:15px; width:20px; text-align:center; }
+        .dropdown-divider { border:none; border-top:1px solid var(--border); margin:6px 0; }
+
+        /* Hamburger Mobile */
+        .nav-hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
+        .nav-hamburger span { display:block; width:22px; height:2px; background:var(--text-dark); border-radius:2px; transition:var(--transition); }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:2000; display:none; }
+        .mobile-menu.open { display:block; }
+        .mobile-menu-panel { position:absolute; top:0; right:0; width:280px; height:100%; background:#fff; padding:24px; transform:translateX(100%); transition:transform .3s; }
+        .mobile-menu.open .mobile-menu-panel { transform:translateX(0); }
+        .mobile-menu-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-body); }
+        .mobile-menu-links { margin-top:32px; display:flex; flex-direction:column; gap:4px; }
+        .mobile-menu-links a { display:block; padding:12px 8px; font-size:15px; font-weight:500; color:var(--text-dark); border-radius:var(--radius); }
+        .mobile-menu-links a:hover { background:var(--bg-light); color:var(--primary); }
+
+        /* Main Content */
+        .main-content { flex:1; width:100%; }
+        .page-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; }
+        .page-heading h1 { color:var(--text-dark); font-size:24px; font-weight:800; letter-spacing:-.3px; }
+        .page-heading p { margin-top:4px; color:var(--text-muted); font-size:14px; }
+
+        /* Flash messages */
+        .alert { padding:14px 18px; border-radius:var(--radius); font-size:14px; font-weight:500; display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+        .alert-success { background:var(--success-bg); color:var(--success); border:1px solid #bbf7d0; }
+        .alert-danger { background:var(--danger-bg); color:var(--danger); border:1px solid #fecaca; }
+
+        /* Unified Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+        .badge::before {
+            content: '●';
+            font-size: 8px;
+        }
+        /* Menunggu / Pending -> Kuning */
+        .badge-pending, .badge-warning, .badge-not_returned {
+            background: #fef9c3 !important;
+            color: #854d0e !important;
+        }
+        /* Sedang disewa -> Biru */
+        .badge-confirmed, .badge-rented, .badge-info, .badge-blue {
+            background: #dbeafe !important;
+            color: #1e40af !important;
+        }
+        /* Sudah kembali / Selesai rental / Completed / Paid -> Hijau */
+        .badge-returned, .badge-completed, .badge-paid, .badge-success {
+            background: #dcfce7 !important;
+            color: #166534 !important;
+        }
+        /* Ditolak / Cancelled / Failed / Unpaid -> Merah / Abu-abu */
+        .badge-rejected, .badge-unpaid, .badge-failed, .badge-danger, .badge-damage {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+        .badge-cancelled, .badge-secondary, .badge-other, .badge-late {
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+        }
+        .badge-late {
+            background: #fef9c3 !important;
+            color: #854d0e !important;
+        }
+
+        /* Table Scroll Containers */
+        .table-scroll-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            background: #fff;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .table-scroll-body {
+            max-height: 560px;
+            overflow-y: auto;
+            width: 100%;
+        }
+        .table-scroll-body table, .custom-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+        .table-scroll-body thead th, .custom-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f8f9fb;
+            box-shadow: 0 1px 0 var(--border);
+        }
+
+        /* Profile Modal */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:3000; display:none; align-items:flex-start; justify-content:center; padding-top:120px; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:var(--radius-lg); width:100%; max-width:420px; box-shadow:var(--shadow-md); overflow:hidden; }
+        .modal-header { padding:20px 24px 0; display:flex; align-items:center; justify-content:space-between; }
+        .modal-title { font-size:18px; font-weight:700; color:var(--text-dark); }
+        .modal-close { background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1; }
+        .modal-body { padding:20px 24px 24px; }
+        .modal-avatar { width:64px; height:64px; border-radius:50%; background:var(--primary); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+        .mform-group { margin-bottom:14px; }
+        .mform-label { display:block; font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+        .mform-control { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:14px; color:var(--text-dark); outline:none; }
+        .btn-save { width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:var(--radius); font-size:14px; font-weight:700; cursor:pointer; margin-top:8px; }
+        .btn-save:hover { background:var(--primary-dark); }
+
+        /* Footer */
+        .footer { background:#fff; border-top:1px solid var(--border); padding:48px 0 0; margin-top:auto; }
+        .footer-grid { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:48px; padding-bottom:40px; }
+        .footer-brand h3 { font-size:20px; font-weight:800; color:var(--text-dark); margin-bottom:8px; }
+        .footer-brand h3 span { color:var(--primary); }
+        .footer-brand p { font-size:13px; color:var(--text-muted); line-height:1.7; max-width:260px; }
+        .footer-col h4 { font-size:13px; font-weight:700; color:var(--text-dark); margin-bottom:14px; }
+        .footer-col li { margin-bottom:8px; }
+        .footer-col a { font-size:13px; color:var(--text-muted); transition:var(--transition); }
+        .footer-col a:hover { color:var(--primary); }
+        .footer-bottom { border-top:1px solid var(--border); padding:16px 0; display:flex; justify-content:space-between; align-items:center; }
+        .footer-bottom p { font-size:12px; color:var(--text-muted); }
+        .footer-bottom-links { display:flex; gap:20px; }
+        .footer-bottom-links a { font-size:12px; color:var(--text-muted); }
+
+        @media(max-width:768px) {
+            .nav-links, .nav-actions { display:none; }
+            .nav-hamburger { display:flex; }
+            .footer-grid { grid-template-columns:1fr 1fr; gap:28px; }
+        }
+        @media(max-width:480px) {
+            .footer-grid { grid-template-columns:1fr; }
+        }
     </style>
     @stack('styles')
 </head>
 <body>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-    <div class="sidebar-brand">
-        <h1>ED<span>.</span>RENT</h1>
-        <p>Admin Panel</p>
-    </div>
-    <nav class="sidebar-nav">
-        <div class="nav-section-label">Menu Utama</div>
-        <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <span class="icon">📊</span> Dashboard
-        </a>
-        <a href="{{ route('admin.motors.index') }}" class="nav-item {{ request()->routeIs('admin.motors.*') ? 'active' : '' }}">
-            <span class="icon">🏍</span> Kelola Motor
-        </a>
-        <a href="{{ route('admin.bookings.index') }}" class="nav-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
-            <span class="icon">📋</span> Pemesanan
-        </a>
-        <div class="nav-section-label" style="margin-top:16px">Akses Cepat</div>
-        <a href="{{ route('home') }}" class="nav-item" target="_blank">
-            <span class="icon">🌐</span> Lihat Website
-        </a>
-    </nav>
-    <div class="sidebar-user">
-        <div class="uname">{{ auth()->user()->name }}</div>
-        <div class="urole">{{ auth()->user()->role->label() }}</div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn-logout">Keluar</button>
-        </form>
-    </div>
-</aside>
+@include('partials.navbar')
 
-<!-- Main Content -->
-<div class="main">
-    <header class="topbar">
-        <h2>@yield('page-title', 'Dashboard')</h2>
-        <div class="topbar-right">
-            <button type="button" onclick="openProfileModal()" class="topbar-badge" style="background:#f0f2ff;border:1px solid #e2e4e9;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#4758D6;display:flex;align-items:center;gap:8px">
-                @if(auth()->user()->avatar)
-                    <img src="{{ auth()->user()->avatar_url }}" alt="" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
-                @else
-                    <span>👤</span>
-                @endif
-                {{ auth()->user()->name }}
-            </button>
-        </div>
-    </header>
-
-    <div class="content">
+<main class="main-content">
+    <div class="container" style="padding-top: 32px; padding-bottom: 48px;">
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
         @if(session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
-
         @yield('content')
     </div>
-</div>
+</main>
 
-<!-- Profile Modal -->
-@auth
-<div class="modal-overlay" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
-    <div class="modal-box">
-        <div class="modal-header">
-            <span class="modal-title">Profil Admin</span>
-            <button class="modal-close" onclick="closeProfileModal()">×</button>
+@include('partials.profile-modal')
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3>ED<span>.</span>RENT</h3>
+                <p>Pilihan terlengkap, harga transparan, dan layanan 24 jam. Siap menemani setiap petualangan Anda.</p>
+            </div>
+            <div class="footer-col">
+                <h4>About</h4>
+                <ul>
+                    <li><a href="{{ route('home') }}">How it works</a></li>
+                    <li><a href="{{ route('vehicles.index') }}">Featured</a></li>
+                    <li><a href="{{ route('vehicles.index') }}">Partnership</a></li>
+                    <li><a href="{{ route('home') }}">Business Relation</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Community</h4>
+                <ul>
+                    <li><a href="{{ route('home') }}">Blog</a></li>
+                    <li><a href="{{ route('home') }}">Podcast</a></li>
+                    <li><a href="{{ route('home') }}">Invite a friend</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Socials</h4>
+                <ul>
+                    <li><a href="https://discord.com" target="_blank">Discord</a></li>
+                    <li><a href="https://instagram.com" target="_blank">Instagram</a></li>
+                    <li><a href="https://twitter.com" target="_blank">Twitter</a></li>
+                    <li><a href="https://facebook.com" target="_blank">Facebook</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="modal-body">
-            <form method="POST" action="{{ route('profile.update') }}" id="profileFormAdmin" enctype="multipart/form-data">
-                @csrf @method('PUT')
-                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-                    <div class="modal-avatar" style="overflow:hidden;flex-shrink:0">
-                        @if(auth()->user()->avatar)
-                            <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" id="adminAvatarImg" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
-                        @else
-                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80" alt="Avatar" id="adminAvatarImg" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
-                        @endif
-                    </div>
-                    <input type="file" name="avatar" id="adminAvatarInput" accept="image/*" style="display:none" onchange="previewAdminAvatar(this)">
-                    <button type="button" class="modal-edit-btn" onclick="document.getElementById('adminAvatarInput').click()">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        Edit gambar
-                    </button>
-                </div>
-                <div class="mform-group">
-                    <label class="mform-label">Nama Lengkap</label>
-                    <input type="text" name="name" class="mform-control" placeholder="Nama Lengkap" value="{{ old('name', auth()->user()->name) }}" required>
-                </div>
-                <div class="mform-group">
-                    <label class="mform-label">No WhatsApp</label>
-                    <input type="text" name="phone" class="mform-control" placeholder="12345678910" value="{{ old('phone', auth()->user()->phone) }}">
-                </div>
-                <div class="mform-group">
-                    <label class="mform-label">No. KTP</label>
-                    <input type="text" name="ktp_number" class="mform-control" placeholder="12345678910" value="{{ old('ktp_number', auth()->user()->ktp_number) }}">
-                </div>
-                <div class="mform-group">
-                    <label class="mform-label">No. SIM</label>
-                    <input type="text" name="sim_number" class="mform-control" placeholder="12345678910" value="{{ old('sim_number', auth()->user()->sim_number) }}">
-                </div>
-                <button type="submit" class="btn-save">Simpan</button>
-            </form>
+        <div class="footer-bottom">
+            <p>&copy;{{ date('Y') }} ED.RENT. All rights reserved</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy &amp; Policy</a>
+                <a href="#">Terms &amp; Condition</a>
+            </div>
         </div>
     </div>
-</div>
-@endauth
+</footer>
 
 <script>
-function openProfileModal() { document.getElementById('profileModal').classList.add('open'); }
-function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
-function previewAdminAvatar(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.getElementById('adminAvatarImg');
-            if (img) img.src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
+function toggleProfile() {
+    var d = document.getElementById('profileDropdown');
+    if (d) d.classList.toggle('open');
 }
+function closeProfileDropdown() {
+    var d = document.getElementById('profileDropdown');
+    if (d) d.classList.remove('open');
+}
+function openProfileModal() {
+    var m = document.getElementById('profileModal');
+    if (m) m.classList.add('open');
+}
+function closeProfileModal() {
+    var m = document.getElementById('profileModal');
+    if (m) m.classList.remove('open');
+}
+function openMobileMenu() {
+    var m = document.getElementById('mobileMenu');
+    if (m) m.classList.add('open');
+}
+function closeMobileMenu() {
+    var m = document.getElementById('mobileMenu');
+    if (m) m.classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('profileDropdown');
+    var btn = document.getElementById('profileBtn');
+    if (dropdown && btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
 </script>
-
 @stack('scripts')
 </body>
 </html>

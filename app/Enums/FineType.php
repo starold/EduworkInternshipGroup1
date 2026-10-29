@@ -10,7 +10,7 @@ enum FineType: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             FineType::Late => 'Keterlambatan',
             FineType::Damage => 'Kerusakan',
             FineType::Other => 'Lainnya',

@@ -12,7 +12,7 @@ enum BookingStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             BookingStatus::Pending => 'Menunggu',
             BookingStatus::Confirmed => 'Dikonfirmasi',
             BookingStatus::Rejected => 'Ditolak',
@@ -23,7 +23,7 @@ enum BookingStatus: string
 
     public function badgeColor(): string
     {
-        return match($this) {
+        return match ($this) {
             BookingStatus::Pending => 'warning',
             BookingStatus::Confirmed => 'success',
             BookingStatus::Rejected => 'danger',

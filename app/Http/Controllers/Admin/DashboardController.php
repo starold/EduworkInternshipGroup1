@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\BookingStatus;
+use App\Enums\MotorStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
@@ -17,7 +18,8 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_motors' => Motor::count(),
-            'available_motors' => Motor::where('status', 'available')->count(),
+            'available_motors' => Motor::where('status', MotorStatus::Available)->count(),
+            'rented_motors' => Motor::where('status', MotorStatus::Rented)->count(),
             'total_bookings' => Booking::count(),
             'pending_bookings' => Booking::where('status', BookingStatus::Pending)->count(),
             'confirmed_bookings' => Booking::where('status', BookingStatus::Confirmed)->count(),
@@ -28,9 +30,14 @@ class DashboardController extends Controller
 
         $recentBookings = Booking::with(['user', 'items.motor', 'payment'])
             ->latest()
+            ->take(8)
+            ->get();
+
+        $popularMotors = Motor::withCount('bookingItems')
+            ->orderByDesc('booking_items_count')
             ->take(5)
             ->get();
 
-        return view('admin.dashboard.index', compact('stats', 'recentBookings'));
+        return view('admin.dashboard.index', compact('stats', 'recentBookings', 'popularMotors'));
     }
 }

@@ -78,7 +78,7 @@
         <p class="page-sub">Pilih kendaraan yang paling sesuai dengan gaya perjalanan dan budget Anda. Semua motor terawat, siap jalan!</p>
 
         <!-- Filter Bar -->
-        <form method="GET" action="{{ route('home') }}" class="filter-bar">
+        <form method="GET" action="{{ route('vehicles.index') }}" class="filter-bar">
             <div class="filter-field">
                 <label>Tipe kendaraan</label>
                 <div class="filter-input-wrap">
@@ -104,7 +104,7 @@
                 Ayo Cari
             </button>
             @if(request('search') || request('category'))
-                <a href="{{ route('home') }}" class="btn-reset">Reset</a>
+                <a href="{{ route('vehicles.index') }}" class="btn-reset">Reset</a>
             @endif
         </form>
 

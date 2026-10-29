@@ -10,7 +10,7 @@ enum ConditionStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             ConditionStatus::Good => 'Baik',
             ConditionStatus::MinorDamage => 'Kerusakan Kecil',
             ConditionStatus::Damaged => 'Rusak',

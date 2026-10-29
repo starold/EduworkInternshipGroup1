@@ -116,6 +116,35 @@
 
     <div class="payment-layout">
         <div>
+            <h1 class="page-title">Upload Bukti Pembayaran</h1>
+
+            <!-- Steps -->
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">Langkah 1</div>
+                    <div class="step-label">Detail Pesanan</div>
+                </div>
+                <div class="step active">
+                    <div class="step-num">Langkah 2</div>
+                    <div class="step-label">Pembayaran</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">Langkah 3</div>
+                    <div class="step-label">Konfirmasi</div>
+                </div>
+            </div>
+
+            @if($booking->payment && $booking->payment->isFailed())
+                <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:16px;margin-bottom:20px">
+                    <strong style="color:#991b1b;font-size:14px;display:block;margin-bottom:4px">⚠ Bukti Pembayaran Sebelumnya Ditolak</strong>
+                    <p style="font-size:13px;color:#b91c1c;margin:0 0 6px 0">
+                        <strong>Alasan:</strong> {{ $booking->payment->rejection_reason }}
+                    </p>
+                    <p style="font-size:12px;color:#7f1d1d;margin:0">
+                        Silahkan periksa kembali nominal/rekening transfer dan upload ulang foto bukti transfer yang valid sebelum tenggat waktu.
+                    </p>
+                </div>
+            @endif
             @if($errors->any())
                 <div style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:14px;border-radius:10px;margin-bottom:20px;font-size:14px">
                     {{ $errors->first() }}

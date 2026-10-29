@@ -12,7 +12,7 @@ enum FuelLevel: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             FuelLevel::Empty => 'Kosong',
             FuelLevel::Quarter => '1/4',
             FuelLevel::Half => '1/2',

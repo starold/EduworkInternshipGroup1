@@ -11,7 +11,7 @@ enum PaymentStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             PaymentStatus::Pending => 'Menunggu Pembayaran',
             PaymentStatus::Paid => 'Sudah Dibayar',
             PaymentStatus::Failed => 'Gagal',
@@ -21,7 +21,7 @@ enum PaymentStatus: string
 
     public function badgeColor(): string
     {
-        return match($this) {
+        return match ($this) {
             PaymentStatus::Pending => 'warning',
             PaymentStatus::Paid => 'success',
             PaymentStatus::Failed => 'danger',

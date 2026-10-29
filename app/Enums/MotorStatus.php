@@ -11,7 +11,7 @@ enum MotorStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             MotorStatus::Available => 'Tersedia',
             MotorStatus::Rented => 'Disewa',
             MotorStatus::Maintenance => 'Perawatan',
@@ -21,7 +21,7 @@ enum MotorStatus: string
 
     public function badgeColor(): string
     {
-        return match($this) {
+        return match ($this) {
             MotorStatus::Available => 'success',
             MotorStatus::Rented => 'warning',
             MotorStatus::Maintenance => 'info',

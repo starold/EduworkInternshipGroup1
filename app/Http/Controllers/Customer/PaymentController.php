@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Customer;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,9 +16,19 @@ class PaymentController extends Controller
     {
         abort_if($booking->user_id !== Auth::id(), 403);
 
+        if ($booking->payment && $booking->payment->isPaid()) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('error', 'Pembayaran untuk pesanan ini sudah selesai diverifikasi.');
+        }
+
+        if (! $booking->isPending()) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('error', 'Status pesanan tidak memungkinkan untuk melakukan pembayaran.');
+        }
+
         $booking->load(['items.motor', 'payment']);
 
-        if ($booking->isPaymentExpired() && (!$booking->payment || !$booking->payment->isPaid())) {
+        if ($booking->isPaymentExpired() && (! $booking->payment || ! $booking->payment->isPaid())) {
             return redirect()->route('customer.payments.expired', $booking);
         }
 
@@ -29,6 +38,24 @@ class PaymentController extends Controller
     public function uploadProof(Request $request, Booking $booking): RedirectResponse
     {
         abort_if($booking->user_id !== Auth::id(), 403);
+
+        abort_if(
+            $booking->payment && $booking->payment->isPaid(),
+            403,
+            'Pembayaran untuk pesanan ini sudah selesai diverifikasi.'
+        );
+
+        abort_if(
+            ! $booking->isPending(),
+            403,
+            'Pesanan tidak dalam status menunggu pembayaran.'
+        );
+
+        if ($booking->isPaymentExpired()) {
+            return back()->withErrors([
+                'payment_proof' => 'Tenggat waktu pembayaran telah habis. Silakan buat pesanan baru.',
+            ]);
+        }
 
         $request->validate([
             'payment_proof' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -43,11 +70,17 @@ class PaymentController extends Controller
                 'payment_method' => $request->payment_method,
                 'payment_proof' => $path,
                 'status' => PaymentStatus::Pending,
+                'rejection_reason' => null,
             ]
         );
 
-        return redirect()->route('customer.payments.success', $booking)
-            ->with('success', 'Bukti pembayaran berhasil diupload.');
+        if ($request->input('redirect_to') === 'success') {
+            return redirect()->route('customer.payments.success', $booking)
+                ->with('success', 'Bukti pembayaran berhasil diupload.');
+        }
+
+        return redirect()->route('customer.bookings.show', $booking)
+            ->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');
     }
 
     public function success(Booking $booking): View

@@ -11,7 +11,7 @@ enum RentalStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             RentalStatus::Scheduled => 'Terjadwal',
             RentalStatus::Active => 'Aktif',
             RentalStatus::Returned => 'Dikembalikan',

@@ -29,7 +29,7 @@ class HomeController extends Controller
         if ($request->filled('search')) {
             $motorsQuery->where(function ($q) use ($request) {
                 $q->where('merk', 'like', "%{$request->search}%")
-                  ->orWhere('model', 'like', "%{$request->search}%");
+                    ->orWhere('model', 'like', "%{$request->search}%");
             });
         }
 
@@ -54,7 +54,7 @@ class HomeController extends Controller
         if ($request->filled('search')) {
             $motorsQuery->where(function ($q) use ($request) {
                 $q->where('merk', 'like', "%{$request->search}%")
-                  ->orWhere('model', 'like', "%{$request->search}%");
+                    ->orWhere('model', 'like', "%{$request->search}%");
             });
         }
 

@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FineController as AdminFineController;
 use App\Http\Controllers\Admin\MotorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Customer\BookingController;
+use App\Http\Controllers\Customer\FineController as CustomerFineController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\PaymentController;
+use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,6 +52,16 @@ Route::middleware('auth')->group(function () {
 
     // Profile update
     Route::put('/profile', [HomeController::class, 'updateProfile'])->name('profile.update');
+
+    // Customer Fines
+    Route::get('/my-fines', [CustomerFineController::class, 'index'])->name('customer.fines.index');
+    Route::get('/fines/{fine}/payment', [CustomerFineController::class, 'showPayment'])->name('customer.fines.payment');
+    Route::post('/fines/{fine}/payment/proof', [CustomerFineController::class, 'uploadProof'])->name('customer.fines.uploadProof');
+    Route::post('/fines/{fine}/pay', [CustomerFineController::class, 'pay'])->name('customer.fines.pay');
+    Route::post('/bookings/{booking}/pay-all-fines', [CustomerFineController::class, 'payAll'])->name('customer.fines.payAll');
+
+    // Reviews
+    Route::post('/booking-items/{bookingItem}/review', [CustomerReviewController::class, 'store'])->name('customer.reviews.store');
 });
 
 /*
@@ -68,4 +81,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.updateStatus');
     Route::post('/bookings/{booking}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::post('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])->name('bookings.reject');
+    Route::post('/bookings/{booking}/payments/verify', [AdminBookingController::class, 'verifyPayment'])->name('bookings.payments.verify');
+    Route::post('/bookings/{booking}/payments/reject', [AdminBookingController::class, 'rejectPayment'])->name('bookings.payments.reject');
+    Route::post('/bookings/{booking}/items/{item}/return', [AdminBookingController::class, 'confirmReturn'])->name('bookings.return');
+    Route::post('/bookings/{booking}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete');
+
+    // Fine Management
+    Route::get('/fines', [AdminFineController::class, 'index'])->name('fines.index');
+    Route::post('/fines', [AdminFineController::class, 'store'])->name('fines.store');
+    Route::post('/fines/{fine}/verify', [AdminFineController::class, 'verifyPayment'])->name('fines.verify');
+    Route::post('/fines/{fine}/reject', [AdminFineController::class, 'rejectPayment'])->name('fines.reject');
+
+    // Review Management (Disabled from active admin UI)
+    Route::get('/reviews', fn () => abort(404))->name('reviews.index');
 });

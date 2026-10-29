@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\MotorStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Motor;
 use App\Models\MotorCategory;
@@ -15,9 +14,15 @@ class MotorController extends Controller
     public function index(Request $request): View
     {
         $motors = Motor::with('category')
-            ->when($request->search, fn ($q) => $q->where('merk', 'like', "%{$request->search}%")
-                ->orWhere('model', 'like', "%{$request->search}%")
-                ->orWhere('plate_number', 'like', "%{$request->search}%"))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = '%'.$request->input('search').'%';
+
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->where('merk', 'like', $search)
+                        ->orWhere('model', 'like', $search)
+                        ->orWhere('plate_number', 'like', $search);
+                });
+            })
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->when($request->category, fn ($q) => $q->where('motor_category_id', $request->category))
             ->latest()
@@ -42,7 +47,7 @@ class MotorController extends Controller
             'merk' => ['required', 'string', 'max:100'],
             'warna' => ['required', 'string', 'max:100'],
             'model' => ['required', 'string', 'max:100'],
-            'year' => ['required', 'integer', 'min:2000', 'max:' . (date('Y') + 1)],
+            'year' => ['required', 'integer', 'min:2000', 'max:'.(date('Y') + 1)],
             'plate_number' => ['required', 'string', 'max:20', 'unique:motors'],
             'price_per_day' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],
@@ -75,8 +80,8 @@ class MotorController extends Controller
             'merk' => ['required', 'string', 'max:100'],
             'warna' => ['required', 'string', 'max:100'],
             'model' => ['required', 'string', 'max:100'],
-            'year' => ['required', 'integer', 'min:2000', 'max:' . (date('Y') + 1)],
-            'plate_number' => ['required', 'string', 'max:20', 'unique:motors,plate_number,' . $motor->id],
+            'year' => ['required', 'integer', 'min:2000', 'max:'.(date('Y') + 1)],
+            'plate_number' => ['required', 'string', 'max:20', 'unique:motors,plate_number,'.$motor->id],
             'price_per_day' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string'],

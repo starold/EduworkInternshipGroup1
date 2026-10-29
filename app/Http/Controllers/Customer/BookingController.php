@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Motor;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,8 +53,8 @@ class BookingController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        $startDate = \Carbon\Carbon::parse($validated['start_date']);
-        $endDate = \Carbon\Carbon::parse($validated['end_date']);
+        $startDate = Carbon::parse($validated['start_date']);
+        $endDate = Carbon::parse($validated['end_date']);
         $totalDays = $startDate->diffInDays($endDate);
 
         $subtotal = $motor->price_per_day * $totalDays;
@@ -101,7 +102,14 @@ class BookingController extends Controller
     {
         abort_if($booking->user_id !== Auth::id(), 403);
 
-        $booking->load(['items.motor.category', 'payment', 'user']);
+        $booking->load([
+            'items.motor.category',
+            'items.fines',
+            'items.review',
+            'items.rental.rentalReturn',
+            'payment',
+            'user',
+        ]);
 
         return view('customer.bookings.show', compact('booking'));
     }
