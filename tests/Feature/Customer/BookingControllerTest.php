@@ -45,6 +45,41 @@ it('shows booking details in the requested order', function () {
         ]);
 });
 
+it('creates a booking with a payment deadline', function () {
+    $this->travelTo('2026-10-31 07:03:23');
+
+    $user = User::factory()->create();
+    $category = MotorCategory::create([
+        'name' => 'Matic',
+        'slug' => 'matic',
+    ]);
+    $motor = Motor::create([
+        'motor_category_id' => $category->id,
+        'merk' => 'Yamaha',
+        'model' => 'NMAX',
+        'warna' => 'Hitam',
+        'year' => 2024,
+        'plate_number' => 'AB 5678 CD',
+        'price_per_day' => 80000,
+        'deposit' => 300000,
+        'status' => MotorStatus::Available,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('customer.bookings.store', $motor), [
+            'start_date' => '2026-10-31',
+            'end_date' => '2026-11-01',
+            'pickup_method' => 'pickup',
+            'notes' => 'Jaga motor dengan baik.',
+        ])
+        ->assertRedirect(route('customer.bookings.index'));
+
+    $booking = Booking::query()->where('user_id', $user->id)->firstOrFail();
+
+    expect($booking->payment_deadline?->toDateTimeString())
+        ->toBe('2026-11-01 07:03:23');
+});
+
 it('hides the pay button after a customer submits payment proof', function () {
     Storage::fake('public');
     $user = User::factory()->create();
